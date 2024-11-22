@@ -1,0 +1,398 @@
+{% extends 'admin_base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<title>Add Product Variant</title>
+<!-- Include Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Include Cropper.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<style>
+    .card-custom {
+        width: 18rem;
+        height: 12rem;
+    }
+    .hello{
+        background-color: antiquewhite;
+        height: 50px;
+        width:100px;
+    }
+    /* Existing styles here... */
+    .cropper-container {
+        direction: ltr;
+        font-size: 0;
+        line-height: 0;
+        position: relative;
+        touch-action: none;
+        user-select: none;
+    }
+
+    /* Other existing styles... */
+
+    /* Custom styles */
+    .delete-btn {
+        opacity: 0.8;
+        transition: opacity 0.2s;
+        border-radius: 50%;
+        font-size: 20px;
+        line-height: 1;
+        z-index: 100;
+    }
+
+    .delete-btn:hover {
+        opacity: 1;
+    }
+
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    #cropperImageContainer {
+        margin-bottom: 20px;
+    }
+
+    
+    .image-upload-container .card:hover .image-options {
+        display: flex !important;
+    }
+    
+</style>
+</head>
+<body>
+
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+          
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container mt-4">
+    <h2>Edit Variant for {{ product.name }}</h2>
+
+
+    <form method="POST" enctype="multipart/form-data" id="variantForm" novalidate>
+        {% csrf_token %}
+
+        <div class="variant-form" id="variants-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Size</label>
+                        <select name="size" class="form-control" required>
+                            {% for size, label in SIZE_CHOICES %}
+                                <option value="{{ size }}" {% if variant.size == size %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="color: #343a40;">Color</label>
+                        <select name="color" class="form-control" required>
+                            {% for color_value, color_display in COLOR_CHOICES %}
+                                <option value="{{ color_value }}" {% if color_value == request.POST.color %}selected{% endif %}>
+                                    {{ color_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" name="stock" class="form-control" value="{{ variant.stock }}" min="0" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" name="price" class="form-control" value="{{ variant.price }}" step="0.01" min="0" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3" title="hello">
+                Save Variant
+            </button>
+
+            
+        {% comment %} <button type="button" class="btn btn-secondary mt-3" onclick="addVariant()">
+            Add Another Variant
+        </button> {% endcomment %}
+
+        
+    </form>
+
+    <!-- <div class="row mt-3">
+        <div class="col-12">
+            <label>Images</label>
+    
+             <div class="image-upload-container d-flex flex-row flex-wrap mb-3">
+                {% if existing_images %}
+                    {% for img in existing_images %}
+                    <div class="position-relative me-3">
+                        <img src="{{ img.image.url }}" alt="Image" style="max-width: 100px; cursor: pointer;" 
+                             onclick="showDeleteButton('{{ img.id }}')">
+                        
+                         <div id="image-options-{{ img.id }}" class="image-options p-4" style="display: none;">
+                            <label for="img_{{ img.id }}" class="p-2 hello">Click to upload image</label>
+                            <input id="img_{{ img.id }}" name="img_{{ img.id }}" class="d-none" type="file" onchange="handleImageSelect(this, '{{ img.id }}')">
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>  
+        </div>
+    </div> -->
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <label class="form-label">Images</label>
+            <div class="image-upload-container d-flex flex-wrap mb-3  justify-content-around ">
+                {% if existing_images %}
+                    {% for img in existing_images %}
+                    <div class="position-relative" style="width: 150px; height: 350px;">
+                        <!-- Card for each image with hover effect -->
+                        <div class="card shadow-sm" style="cursor: pointer;">
+                            <img src="{{ img.image.url }}" alt="Image" class="card-img-top" style="object-fit: cover; height: 150px;" onclick="showUpdateOptions('{{ img.id }}')">
+                            
+                            <!-- Overlay with update option on hover -->
+                            <div id="image-options-{{ img.id }}" class="image-options position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.5); display: none;">
+                                <label for="img_{{ img.id }}" class="btn btn-outline-light btn-sm">Upload New Image</label>
+                                <input id="img_{{ img.id }}" name="img_{{ img.id }}" class="d-none" type="file" onchange="handleImageSelect(this, '{{ img.id }}')">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    </div>
+
+
+</div>
+
+<!-- Cropper Modal -->
+<div class="cropper-container" id="cropperModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div class="card" style="max-width: 800px; margin: 2rem auto;">
+        <div class="card-body">
+            <div id="cropperImageContainer" style="max-height: 40vh; overflow: auto;">
+                <img id="cropperImage" style="max-width: 30%; display: block;" />
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-primary" id="cropButton" onclick="cropImage()">Crop & Save</button>
+                <button class="btn btn-secondary" onclick="cancelCrop()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Cropper.js and custom JS -->
+<link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+<script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let cropper;
+let currentImageInput;
+let currentPreviewContainer;
+
+function handleImageSelect(input, variantId) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        currentImageInput = input;
+        currentPreviewContainer = document.getElementById(`preview_${variantId}`);
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            showImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+
+
+function showImage(imageSrc) {
+    const modal = document.getElementById('cropperModal');
+    const imageElement = document.getElementById('cropperImage');
+
+    // Destroy existing cropper if any
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+
+    // Show the image and modal
+    imageElement.src = imageSrc;
+    imageElement.style.display = 'block';
+    modal.style.display = 'block';
+    
+    // Initialize cropper
+    initializeCropper();
+}
+
+function initializeCropper() {
+    const imageElement = document.getElementById('cropperImage');
+
+    cropper = new Cropper(imageElement, {
+        viewMode: 1,
+        dragMode: 'crop',
+        aspectRatio: NaN,
+        autoCropArea: 0.8,
+        movable: true,
+        rotatable: false,
+        scalable: false,
+        zoomable: true,
+        guides: true,
+        center: true,
+        highlight: true,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: true,
+        minContainerWidth: 200,
+        minContainerHeight: 200,
+        background: true,
+        responsive: true,
+        restore: false,
+        checkCrossOrigin: false
+    });
+
+    document.getElementById('cropButton').style.display = 'inline-block';
+}
+
+function cropImage() {
+    if (!cropper) return;
+
+    const croppedCanvas = cropper.getCroppedCanvas({
+        maxWidth: 500,
+        maxHeight: 500,
+    });
+
+    croppedCanvas.toBlob((blob) => {
+        // Create a new FormData object and append the cropped image
+        const formData = new FormData();
+        formData.append('image_id', currentImageInput.id.split('_')[1]); // Image ID from the input ID
+        formData.append('new_image', blob, 'cropped_image.jpg');  // Append blob as 'new_image'
+
+        // Send an AJAX request to replace the image
+        fetch("{% url 'delete_image' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                
+                alert(data.error);  // Handle error
+            } else {
+                // Successfully saved; reload or update the UI as needed
+                console.log('successsss')
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+
+        closeCropperModal();
+    }, 'image/jpeg', 0.9);
+}
+
+function closeCropperModal() {
+    const modal = document.getElementById('cropperModal');
+    modal.style.display = 'none';
+}
+
+function cancelCrop() {
+    closeCropperModal();
+}
+
+    function selectExistingImage(imgElement, imgId) {
+        const modal = document.getElementById('cropperModal');
+        const imageElement = document.getElementById('cropperImage');
+
+        // Clear any existing cropper
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+
+        // Set the selected image as the current image
+        imageElement.src = imgElement.src; // Use the existing image's source
+        imageElement.style.display = 'block';
+        modal.style.display = 'block';
+
+        // Initialize cropper
+        initializeCropper();
+        
+        // Remove selected image
+        imgElement.parentElement.remove();
+    }
+
+   </script>
+<script>
+    function showDeleteButton(imageId) {
+        // Hide all other delete buttons
+        document.querySelectorAll('.image-options').forEach(el => el.style.display = 'none');
+    
+        // Show the delete button for the clicked image
+        document.getElementById(`image-options-${imageId}`).style.display = 'block';
+    }
+    
+    function deleteImage(event, imageId) {
+        event.stopPropagation();
+    
+        fetch("{% url 'delete_image' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for security
+            },
+            body: JSON.stringify({ image_id: imageId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hide the image without reloading the page
+                const imageElement = document.getElementById(`image-options-${imageId}`);
+                if (imageElement) {
+                    imageElement.parentElement.style.display = 'none';
+                }
+                console.log("Image deleted successfully");
+            } else {
+                console.error("Failed to delete image:", data.error || "Unknown error");
+                alert(data.error || "Failed to delete image. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("An error occurred. Please try again later.");
+        });
+    }
+    
+    </script>
+    {% endblock %}
+
+    <script>
+        function showUpdateOptions(imageId) {
+            const optionsDiv = document.getElementById(`image-options-${imageId}`);
+            optionsDiv.style.display = optionsDiv.style.display === "none" ? "flex" : "none";
+        }
+        
+        
+    </script>

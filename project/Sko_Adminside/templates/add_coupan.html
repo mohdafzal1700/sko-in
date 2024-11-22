@@ -1,0 +1,159 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 768px;
+        margin: auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: #000; /* Ensures all text in the form container is black */
+        text-align: left;
+    }
+
+    .form-label, .form-check-label, .form-text, .btn { /* Styling form elements */
+        color: #000 !important; /* Set all form text to black */
+    }
+    .form-container h2 {
+        text-align: center; /* Left-aligns the heading */
+        color: #000;
+    }
+
+
+    .text-danger {
+        color: #dc3545 !important; /* Keep error messages red */
+    }
+
+    .form-check {
+        text-align: left; /* Left-aligns checkbox label */
+    }
+
+</style>
+
+<div class="container">
+    <div class="form-container">
+        <h2 class="mb-4">Add Coupon</h2>
+        
+        <form method="post" action="">
+            {% csrf_token %}
+            
+            <!-- Code -->
+            <div class="mb-3">
+                <label for="{{ form.code.id_for_label }}" class="form-label text-left">Coupon Code</label>
+                {{ form.code }}
+                {% if form.code.errors %}
+                    <div class="text-danger">{{ form.code.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Discount Type -->
+            <div class="mb-3">
+                <label for="{{ form.discount_type.id_for_label }}" class="form-label">Discount Type</label>
+                {{ form.discount_type }}
+                {% if form.discount_type.errors %}
+                    <div class="text-danger">{{ form.discount_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Value -->
+            <div class="mb-3">
+                <label for="{{ form.value.id_for_label }}" class="form-label">Discount Value</label>
+                {{ form.value }}
+                {% if form.value.errors %}
+                    <div class="text-danger">{{ form.value.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Minimum Purchase Amount -->
+            <div class="mb-3">
+                <label for="{{ form.minimum_purchase_amount.id_for_label }}" class="form-label">Minimum Purchase Amount</label>
+                {{ form.minimum_purchase_amount }}
+                {% if form.minimum_purchase_amount.errors %}
+                    <div class="text-danger">{{ form.minimum_purchase_amount.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Maximum Discount -->
+            <div class="mb-3">
+                <label for="{{ form.maximum_discount.id_for_label }}" class="form-label">Maximum Discount</label>
+                {{ form.maximum_discount }}
+                {% if form.maximum_discount.errors %}
+                    <div class="text-danger">{{ form.maximum_discount.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Start Date -->
+            <div class="mb-3">
+                <label for="{{ form.start_date.id_for_label }}" class="form-label">Valid From</label>
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                    <div class="text-danger">{{ form.start_date.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- End Date -->
+            <div class="mb-3">
+                <label for="{{ form.end_date.id_for_label }}" class="form-label">Valid To</label>
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                    <div class="text-danger">{{ form.end_date.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Usage Limit -->
+            <div class="mb-3">
+                <label for="{{ form.usage_limit.id_for_label }}" class="form-label">Usage Limit</label>
+                {{ form.usage_limit }}
+                {% if form.usage_limit.errors %}
+                    <div class="text-danger">{{ form.usage_limit.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            
+            <!-- Active Status -->
+            <div class="form-check mb-3">
+                {{ form.is_active }}
+                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active Status</label>
+                {% if form.is_active.errors %}
+                    <div class="text-danger">{{ form.is_active.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-danger text-white">Create Coupon</button>
+            <a href="{% url 'coupon_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<!-- Flatpickr Date Picker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  flatpickr("#start_date", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i:S",
+    minDate: "today",
+    time_24hr: true,
+    allowInput: true,
+  });
+
+  flatpickr("#end_date", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i:S",
+    minDate: "today",
+    time_24hr: true,
+    allowInput: true,
+  });
+</script>
+
+
+{% endblock %}

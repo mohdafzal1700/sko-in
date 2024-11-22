@@ -1,0 +1,332 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<!-- jQuery -->
+
+
+<style>
+  .form-container {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    width: 800px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+
+  h1 {
+    text-align: center;
+    color: white;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #f0f0f0;
+  }
+
+  textarea {
+    resize: none;
+    height: 100px;
+  }
+
+  .image-upload-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .modal-content img {
+    width: 100%;
+  }
+
+
+  .image-upload {
+    width: 22%;
+    height: 100px;
+    background-color: #444;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .custom-file-upload {
+    display: block; /* Change to block */
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    position: relative; /* For positioning the tooltip */
+    margin-bottom: 10px; /* Space between uploads */
+  }
+  
+  .custom-file-upload:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+  }
+  
+  input[type="file"] {
+    display: none; /* Hide the default file input */
+  }
+  
+  .tooltip {
+    visibility: hidden;
+    width: 160px;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position above the button */
+    left: 50%;
+    margin-left: -80px; /* Center the tooltip */
+    opacity: 0; /* Hide tooltip */
+    transition: opacity 0.3s;
+  }
+  
+  .custom-file-upload:hover .tooltip {
+    visibility: visible; /* Show tooltip on hover */
+    opacity: 1; /* Fade in tooltip */
+  }
+  
+    
+
+  .image-upload input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .image-upload img {
+    max-width: 100%;
+    max-height: 100%;
+    display: none;
+  }
+
+  .add-product-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    grid-column: span 2;
+    margin-top: 20px;
+  }
+
+  .main-con {
+    flex: 0;
+    background-color: #444;
+    margin: 20px;
+    border-radius: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+  }
+  
+</style>
+
+<div>
+    <div class="d-flex mt-3">
+      <div class="sidebar">
+        <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
+        <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
+        <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
+        <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
+        <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
+        <a href="{% url 'offer' %}" data-section="banner"><i class="fa fa-image"></i> Offers</a>
+        <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
+    </div>
+
+        <div class="main-con">
+            <div class="form-container">
+                <h1>Add Product</h1>
+                <form method="POST" enctype="multipart/form-data" onsubmit="return uploadCroppedImage()">
+                    {% csrf_token %}
+                    <fieldset>
+                        <legend style="color: white;">Product Information</legend>
+                        <div class="form-grid">
+                            {{ product_form.as_p }}
+                        </div>
+                    </fieldset>
+
+                    
+                    
+                          <!-- Add Variant Button -->
+                          {% comment %} <div class="d-flex justify-content-center mt-3">
+                            <a href="" class="btn btn-primary">Add Variant</a>
+
+                        </div> {% endcomment %}
+
+
+                    
+
+                    <button type="submit" class="add-product-button">Add Product</button>
+                </form>
+            </div>
+        </div>
+{% comment %} 
+<!-- Modal for Image Cropping -->
+<div class="modal fade" id="imageCropperModal" tabindex="-1" aria-labelledby="imageCropperModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl d-flex justify-content-center align-items-center" style="max-width: 90vw; width: 80vw;"> <!-- Adjust the modal width -->
+        <div class="modal-content" style="padding: 20px; border-radius: 10px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageCropperModalLabel" style="font-size: 1.5rem;">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <img id="modal-image" class="img-fluid" style="max-width: 100%; max-height: 80vh; border: 2px solid #ddd; border-radius: 8px;" /> <!-- Adjust max-height -->
+            </div>
+            <div class="modal-footer d-flex justify-content-between" style="padding: 10px 20px;">
+                <button type="button" class="btn btn-danger btn-lg" onclick="deleteImage()">Delete</button>
+                <button type="button" class="btn btn-success btn-lg" onclick="saveCroppedImage()">Save</button>
+            </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+
+
+
+
+        {% comment %} <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+        <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+
+        <script>
+            let croppers = [];
+            let currentCropper = null;
+            let currentCropperIndex = null;
+
+            function previewImage(input, index) {
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById(`preview-${index}`);
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+
+                        document.getElementById(`file-name-${index}`).textContent = 'Remove Image';
+                        document.querySelector(`label[for="file-input-${index}"]`).style.display = 'none';
+                        input.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function openCropperModal(index) {
+                const preview = document.getElementById(`preview-${index}`);
+                const modalImage = document.getElementById('modal-image');
+                modalImage.src = preview.src;
+
+                currentCropperIndex = index;
+                $('#imageCropperModal').modal('show');
+
+                if (currentCropper) {
+                    currentCropper.destroy();
+                }
+
+                currentCropper = new Cropper(modalImage, {
+                    aspectRatio: NaN, // Allows free-form cropping
+                    viewMode: 1,
+                    autoCropArea: 1,
+                });
+                
+                
+            }
+
+            function saveCroppedImage() {
+                if (currentCropper) {
+                    currentCropper.getCroppedCanvas().toBlob((blob) => {
+                        const reader = new FileReader();
+                        reader.onloadend = function () {
+                            const preview = document.getElementById(`preview-${currentCropperIndex}`);
+                            preview.src = reader.result;
+
+                            // Create a hidden input to store the cropped image data
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = `cropped_image_data_${currentCropperIndex}`;
+                            hiddenInput.value = reader.result;
+                            document.forms[0].appendChild(hiddenInput);
+
+                            $('#imageCropperModal').modal('hide');
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+                }
+            }
+
+            function deleteImage() {
+                if (confirm('Are you sure you want to delete this image?')) {
+                    const index = currentCropperIndex;
+                    croppers[index]?.destroy();
+                    croppers[index] = null;
+
+                    const preview = document.getElementById(`preview-${index}`);
+                    preview.src = '';
+                    preview.style.display = 'none';
+
+                    document.getElementById(`file-name-${index}`).textContent = 'Choose File';
+                    document.querySelector(`label[for="file-input-${index}"]`).style.display = 'block';
+                    document.getElementById(`file-input-${index}`).style.display = 'block';
+
+                    $('#imageCropperModal').modal('hide');
+                }
+            }
+
+            function uploadCroppedImage() {
+                alert('Submitting the form with cropped images.');
+                return true;
+            }
+            // Render variant fields dynamically
+    // Render variant fields dynamically based on the variant count
+    function renderVariants() {
+        const variantCount = document.getElementById('variant-count').value;
+        const container = document.getElementById('variants-container');
+        container.innerHTML = ''; // Clear previous content
+    
+        for (let i = 0; i < variantCount; i++) {
+          const variantDiv = document.createElement('div');
+          variantDiv.innerHTML = `
+            <fieldset>
+              <legend>Variant ${i + 1}</legend>
+    
+              <label for="variant-size-${i}">Size:</label>
+              <input type="text" name="variant-${i}-size" id="variant-size-${i}" placeholder="e.g., 7, 8, 9" required />
+    
+              <label for="variant-color-${i}">Color:</label>
+              <input type="text" name="variant-${i}-color" id="variant-color-${i}" placeholder="e.g., Black, White" required />
+    
+              <label for="variant-stock-${i}">Stock:</label>
+              <input type="number" name="variant-${i}-stock" id="variant-stock-${i}" min="0" value="0" required />
+    
+              <label for="variant-price-${i}">Additional Price:</label>
+              <input type="number" step="0.01" name="variant-${i}-price" id="variant-price-${i}" min="0" value="0.00" required />
+            </fieldset>`;
+          container.appendChild(variantDiv);
+        }
+      }
+          </script>
+    </div> {% endcomment %}
+</div>
+
+  
+  {% endblock %}
+  

@@ -1,0 +1,120 @@
+       /* Global Styles */
+       body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+        color: #fff;
+        text-align: center;
+    }
+    
+    header {
+        background-color: #111;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .navbar .logo {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        display: flex;             
+        justify-content: center;
+    }
+    
+    .hamburger-menu {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+    }
+    
+    .hamburger-menu span {
+        background-color: #fff;
+        height: 3px;
+        margin: 4px 0;
+        width: 25px;
+    }
+    
+    .nav-links {
+        display: flex;
+        list-style: none;
+    }
+    
+    .nav-links li {
+        margin-left: 20px;
+    }
+    
+    .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+    }
+    
+    /* OTP Container */
+    .otp-container {
+        background-color: #DCDCDC;
+        border-radius: 12px;
+        padding: 30px;
+        width: 400px;
+        margin: 80px auto;
+        color: #000;
+    }
+    
+    .otp-inputs input {
+        width: 40px;
+        height: 40px;
+        margin: 5px;
+        text-align: center;
+        font-size: 18px;
+    }
+    
+    .validate-btn {
+        background-color: #555;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+    
+    footer {
+        margin-top: 50px;
+        padding: 20px;
+        background-color: #111;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .nav-links {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            background-color: #111;
+            padding: 10px;
+        }
+    
+        .hamburger-menu {
+            display: flex;
+        }
+    
+        .nav-links.show {
+            display: flex;
+        }
+    }
+
+    #google-login-btn {
+        transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+    }
+    
+    #google-login-btn:hover {
+        background-color: #0056b3; /* Change this to your desired hover color */
+        color: white; /* Optional: Change text color on hover */
+    }
+    .rounded-button {
+        border-radius: 50px; /* Make corners rounded */
+    }
+    

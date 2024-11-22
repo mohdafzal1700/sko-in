@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+
+{% block title %}Product List Page{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Fade In and Shake Animations */
+    .fade-in {
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+    }
+    .fade-in.show {
+        opacity: 1;
+    }
+    /* Heart icon styles */
+    .heart-icon {
+        position: absolute;
+        top: 15px; /* Adjust to position properly on the image */
+        right: 15px; /* Adjust to position properly on the image */
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        z-index: 10; /* Ensure it appears above the image */
+        font-size: 24px; /* Adjust size as needed */
+        color: white; /* Default color */
+        transition: color 0.3s ease; /* Smooth hover effect */
+    }
+
+    .heart-icon:hover {
+        color: red; /* Change to red on hover */
+    }
+
+    /* Optional: Enlarge heart on hover */
+    .heart-icon:hover i {
+        transform: scale(1.2); /* Slight enlargement */
+        transition: transform 0.2s ease; /* Smooth enlargement */
+    }
+
+    
+    .zoom-preview {
+        position: absolute;
+        border: 1px solid #ccc; /* Border for the zoomed image */
+        border-radius:50%;
+        background-color: white;
+        z-index: 10; /* Appear above other content */
+        display: none; /* Hide initially */
+        padding: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        width: 250px; /* Increased width of the zoom area */
+        height: 250px; /* Increased height of the zoom area */
+    }
+
+    .zoom-preview img {
+        position: absolute;
+        width: 800px; /* Size of the zoomed image for more detail */
+        height: 600px; /* Maintain aspect ratio */
+    }
+    
+    .quantity-input {
+        width: 40px;
+        text-align: center;
+    }
+
+    .input-group .btn {
+        min-width: 30px;
+        font-size: 14px;
+    }
+
+    .whatsapp-button {
+        background-color: #25D366;
+        color: white;
+    }
+
+    .whatsapp-button:hover {
+        background-color: #1DAF5E;
+    }
+
+    .custom-cart-button {
+        background-color: rgba(255, 255, 255, 0.8);
+        color: black;
+        border-radius: 25px;
+        border: none;
+        transition: background-color 0.3s;
+    }
+
+    .related-products .related-product-item {
+        width: 22%;
+        margin: 1%;
+        text-align: center;
+    }
+
+    .custom-cart-button:hover {
+        background-color: rgba(255, 255, 255, 1);
+        color: black;
+    }
+
+    .thumbnail-container img {
+        transition: opacity 0.3s;
+    }
+    .thumbnail-container:hover img {
+        opacity: 0.5;
+    }
+    .whatsapp-button {
+        background-color: #25D366; /* WhatsApp Green */
+        color: white;
+        
+        border-radius: 25px;
+        transition: background-color 0.3s;
+    }
+    
+    .whatsapp-button:hover {
+        background-color: #1DAF5E; /* Darker green on hover */
+    }
+    
+</style>
+
+<body>
+    <div class="container py-5 fade-in" id="productList">  <!-- Add fade-in class here -->
+        <div class="row g-4">    
+            <!-- Main Product Details -->
+            <div class="col-lg-6 d-flex gap-4">
+                <div class="d-flex flex-column gap-3" style="position: sticky; top: 20px;">
+                    {% for image in product.variants.first.images.all %}
+                    <div class="thumbnail-container border rounded p-1" style="width: 90px; height: 90px;">
+                        <button class="btn p-0 border-0" style="width: 100%; height: 100%;" 
+                                onclick="setImage('{{ image.image.url }}')">
+                            <img src="{{ image.image.url }}" alt="Product thumbnail" class="img-fluid rounded" 
+                                 style="object-fit: cover; width: 100%; height: 100%;">
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex-grow-1 d-flex position-relative">
+                    <div class="position-relative w-100">  
+                        {% if product.variants.first.images.first %}
+                        <img id="mainImage" src="{{ product.variants.first.images.first.image.url }}" alt="Product image" class="img-fluid rounded" style="width: 100%; height: 600px; object-fit: cover;">
+                        {% else %}
+                        <img id="mainImage" src="/static/placeholder.svg?height=600&width=600" alt="Placeholder image" class="img-fluid rounded" style="width: 100%; height: 600px; object-fit: cover;">
+                        {% endif %}
+
+                        <form action="{% url 'add_to_wishlist' %}" method="post" class="add-to-wishlist-form" id="wishlistForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="variant_id" value="{{ default_variant.id }}">
+                            
+                            {% if product_in_wishlist %}
+                                <!-- If product is in wishlist, display heart in red -->
+                                <button type="submit" class="btn btn-link heart-icon" style="color: red;">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            {% else %}
+                                <!-- If product is not in wishlist, display heart in white -->
+                                <button type="submit" class="btn btn-link heart-icon" style="color: white;">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            {% endif %}
+                        </form>
+                        
+                    </div>
+
+                    <div id="zoom" class="zoom-preview">
+                        <img id="zoomedImage" src="{{ product.variants.first.images.first.image.url }}" alt="Zoomed image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Details Section -->
+            <div class="col-lg-6">
+                <p class="text small text-start">SKO.IN</p>
+                <h1 class="display-5 fw-bold text-start">{{ product.name }}</h1>
+                <div class="d-flex align-items-baseline gap-2 my-3 text-start">
+                    <span class="fs-3 fw-bold" id="variantPrice">Rs. {{ product.variants.first.price }}</span>
+                     <span class="fs-4  text ms-3" id="variantStock">Stock: {{ product.variants.first.stock }}</span>
+                    
+                     
+                </div>
+               
+                
+                <form action="{% url 'add_to_cart' %}" method="post">
+                    {% csrf_token %}
+                    <!-- Set the default variant ID from `default_variant` in the hidden input field -->
+                    <input type="hidden" name="variant_id" id="hidden_variant_id" value="{{ default_variant.id }}">
+                
+                    <div class="mb-2" style="width: 8em;">
+                        <label class="form-label">Size & Color</label>
+                        <select class="form-select" id="variantSelect" aria-label="Select size" onchange="updateVariantSelection()">
+                            {% for variant in variants %}
+                                <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}"
+                                    {% if variant.id == default_variant.id %}selected{% endif %}>
+                                       {{ variant.size }} - {{ variant.color }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                
+                    <div class="mb-3" style="width: 6em;">
+                        <label class="form-label">Quantity</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(-1)">-</button>
+                            <input type="text" id="quantity" class="form-control text-center quantity-input" value="1" name="quantity" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(1)">+</button>
+                        </div>
+                    </div>
+                
+                    <div class="d-grid gap-2 my-3">
+                        <button type="submit" class="btn custom-cart-button btn-lg mb-5 mt-4">Add to cart</button>
+
+</form>
+
+<a href="https://wa.me/918891694003?text=Hello%2C%20I%27d%20like%20to%20place%20an%20order!" target="_blank" class="btn custom-cart-button btn-lg whatsapp-button mb-5 mt-4">ORDER ON WHATSAPP</a>
+
+                   
+            </div>
+        </div>
+        <h1 class="mt-5 text-light">Related Products</h1>
+        <div class="row g-4">
+          {% for product in related_product %}
+            <div class="col-12 col-sm-6 col-lg-3">
+              <a href="{% url 'product_view' product.pk %}" class="text-decoration-none">
+                <div class="card border-0 rounded-3 shadow-sm hover-shadow bg-dark text-light">
+                  <div class="position-relative">
+                    {% with variant=product.variants.first %}
+                      {% if variant %}
+                        {% with image=variant.images.first %}
+                          {% if image %}
+                            <img src="{{ image.image.url }}" class="card-img-top rounded-top" alt="{{ product.name }}" style="object-fit: cover; height: 200px;">
+                          {% else %}
+                            <img src="/path/to/placeholder.jpg" class="card-img-top rounded-top" alt="Placeholder" style="object-fit: cover; height: 200px;">
+                          {% endif %}
+                        {% endwith %}
+                      {% else %}
+                        <img src="/path/to/placeholder.jpg" class="card-img-top rounded-top" alt="Placeholder" style="object-fit: cover; height: 200px;">
+                      {% endif %}
+                    {% endwith %}
+                  </div>
+                  <div class="card-body p-3 text-start">
+                    <h5 class="card-title text-light mb-2 text-truncate" style="font-size: 1.1rem; font-weight: 500;">{{ product.name }}</h5>
+                    <p class="fw-bold" style="font-size: 1.1rem;">Rs. {{ product.variants.first.price|floatformat:2 }}</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+        
+               
+
+    <script>
+        let originalImageUrl = document.getElementById("mainImage").src;
+
+        function setImage(url) {
+            document.getElementById("mainImage").src = url;
+            document.getElementById("zoomedImage").src = url;
+        }
+
+        function updateQuantity(change) {
+            const quantityField = document.getElementById("quantity");
+            let quantity = parseInt(quantityField.value);
+            quantity = Math.max(1, quantity + change);
+            quantityField.value = quantity;
+        }
+
+        function updatePriceAndStock() {
+            const variantSelect = document.getElementById("variantSelect");
+            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+            
+            const price = selectedOption.getAttribute('data-price');
+            document.getElementById('variantPrice').textContent = `Rs. ${price}`;
+
+            const stock = parseInt(selectedOption.getAttribute('data-stock'));
+            const stockText = stock < 20 ? 'Limited Stock' : `Stock: ${stock}`;
+            document.getElementById('variantStock').textContent = stockText;
+        }
+
+        const mainImage = document.getElementById("mainImage");
+        const zoom = document.getElementById("zoom");
+        const zoomedImage = document.getElementById("zoomedImage");
+        
+        mainImage.addEventListener("mousemove", function(e) {
+            const bounds = mainImage.getBoundingClientRect();
+            const x = e.clientX - bounds.left;
+            const y = e.clientY - bounds.top;
+            zoom.style.display = 'block';
+            zoom.style.left = e.pageX + 'px';
+            zoom.style.top = e.pageY + 'px';
+            zoomedImage.style.left = -x * 1.5 + 'px';
+            zoomedImage.style.top = -y * 1.5 + 'px';
+        });
+
+        mainImage.addEventListener("mouseleave", function() {
+            zoom.style.display = 'none';
+        });
+
+        // Fade-in effect after the content is loaded
+        window.onload = function() {
+            const fadeInElements = document.querySelectorAll('.fade-in');
+            fadeInElements.forEach(function(element) {
+                element.classList.add('show');
+            });
+        };
+    </script>
+
+    <script>
+        function updateVariantSelection() {
+            const variantSelect = document.getElementById("variantSelect");
+            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+            
+            // Update hidden input field with selected variant ID
+            document.getElementById("hidden_variant_id").value = selectedOption.value;
+    
+            // Update the price and stock display based on selected variant
+            const price = selectedOption.getAttribute("data-price");
+            const stock = selectedOption.getAttribute("data-stock");
+            document.getElementById("variantPrice").innerText = `Rs. ${price}`;
+            document.getElementById("variantStock").innerText = `Stock: ${stock}`;
+            
+
+             // Update stock display based on stock value
+            const variantStockElement = document.getElementById("variantStock");
+            if (stock === 0) {
+                variantStockElement.innerText = "No stock";
+                variantStockElement.style.color = "red";
+            } else if (stock <= 10) {
+                variantStockElement.innerText = "Limited stock available";
+                variantStockElement.style.color = "orange";
+            } else {
+                variantStockElement.innerText = `Stock: ${stock}`;
+                variantStockElement.style.color = "white"; // Reset to default color
+            }
+    }
+    </script>
+
+<script>
+
+    
+</script>
+
+    
+    
+
+
+{% endblock %}

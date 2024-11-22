@@ -1,0 +1,46 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+   <!-- Main Content -->
+<main class="flex-grow-1 d-flex align-items-center justify-content-center px-4" style="font-family: 'Inclusive Sans', sans-serif;">
+    <div class="bg-white text-dark rounded mt-5 p-1 p-md-4 w-50" style="max-width: 450px;">
+      <div class="d-flex justify-content-center">
+        <h2 class="fs-1 mt-0 fw-medium mb-0">ADMIN LOGIN </h2>
+      </div>
+      <div class="d-flex justify-content-center">
+        <p class="text-muted mt-0 mb-5" style="font-size: 0.8em; letter-spacing: 0.3em;">Welcome Back!!!</p>
+      </div>
+  
+      <form method="POST" enctype="multipart/form-data" class="mb-3">
+        {% csrf_token %}
+        <div class="mb-3">
+          <input 
+            type="text" 
+            style="border-radius: 50px; background-color: #DCDCDC; color: black;" 
+            name="username" 
+            class="form-control bg-light" 
+            placeholder="Username" 
+            value='{{username}}'
+            required>
+        </div>
+        <div class="mb-3">
+          <input 
+            type="password" 
+            style="border-radius: 50px; background-color: #DCDCDC; color: black;" 
+            name="password" 
+            class="form-control bg-light" 
+            placeholder="Password" 
+            required>
+        </div>
+  
+        <div class="d-flex justify-content-center">
+          <button type="submit" class="btn mt-1" style="background-color: grey; color: white; width: 30%; font-size: 1.2rem; padding: 5px; border-radius: 20px;">Submit</button>
+        </div>
+      </form>
+  
+     
+      
+  </main>
+  {% endblock %}
+  
+    

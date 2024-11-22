@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Wish List{% endblock %}
+
+{% block content %}
+<style>
+  .wishlist-container {
+    background-color: #f8f9fa; /* Light background for contrast */
+    padding: 2rem;
+  }
+
+  .wishlist-header {
+    color: #333;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .wishlist-card {
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .wishlist-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .wishlist-image {
+    object-fit: cover;
+    width: 100%;
+    height: 180px;
+    background-color: #e9ecef;
+  }
+
+  .wishlist-card-body {
+    padding: 1rem;
+  }
+
+  .wishlist-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+  }
+
+  .wishlist-prices {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .wishlist-prices .line-through {
+    text-decoration: line-through;
+    color: #6c757d;
+  }
+
+  .wishlist-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+
+  .wishlist-actions button {
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .wishlist-actions button:hover {
+    color: #dc3545;
+  }
+
+  .wishlist-actions .icon-heart:hover {
+    color: #ff4d6d;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    border: none;
+    transition: background-color 0.3s;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="wishlist-container">
+  <h1 class="wishlist-header">Wish List ({{ items.count }})</h1>
+  <div class="row g-4">
+    {% for wishlist_item in items %}
+      <div class="col-6 col-sm-4 col-md-3">
+        <div class="wishlist-card">
+          <!-- Product Image -->
+          <a href="{% url 'product_view' wishlist_item.varients.product.pk %}">
+            {% with variant=wishlist_item.varients %}
+              {% if variant and not variant.is_delete %}
+                {% with image=variant.images.first %}
+                  {% if image %}
+                    <img src="{{ image.image.url }}" alt="{{ variant.product.name }}" class="wishlist-image">
+                  {% else %}
+                    <img src="/path/to/placeholder.jpg" alt="Placeholder Image" class="wishlist-image">
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                <img src="/path/to/placeholder.jpg" alt="Placeholder Image" class="wishlist-image">
+              {% endif %}
+            {% endwith %}
+          </a>
+
+          <!-- Card Body -->
+          <div class="wishlist-card-body">
+            <h5 class="wishlist-title">
+              {{ wishlist_item.varients.product.name }}
+            </h5>
+            <div class="wishlist-prices">
+              <span class="line-through">Rs. {{ wishlist_item.varients.price|floatformat:2 }}</span>
+              <span class="fw-bold">Rs. {{ wishlist_item.varients.price|floatformat:2 }}</span>
+            </div>
+
+            <!-- Wishlist Actions -->
+            <div class="wishlist-actions">
+              <form action="{% url 'delete_wishlist' wishlist_item.varients.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" title="Remove from Wishlist">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </form>
+              <form action="{% url 'add_to_cart' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="variant_id" value="{{ wishlist_item.varients.id }}">
+                <button type="submit" title="Add to Cart">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Signup Page{% endblock %}
+
+{% block content %}
+
+<main class="flex-grow-1 d-flex align-items-center justify-content-center px-3" style="font-family: 'Inclusive Sans', sans-serif;">
+    <div class="bg-white text-dark rounded mt-5 p-1 p-md-4 w-50" style="max-width: 400px;">
+      <div class="d-flex justify-content-center">
+        <h2 class="fs-2 fw-medium mb-2">Reset Password</h2>
+      </div>
+      <div class="d-flex justify-content-center">
+        <p class="text-muted mb-4">Enter your email to reset password</p>
+      </div>
+
+      <form action="" method="POST" enctype="multipart/form-data" class="mb-3">
+        {% csrf_token %}
+        <input type="email" name="email" class="form-control bg-light" placeholder="Email address" required>
+        <div class="d-flex justify-content-center mt-4">
+            <button type="submit" class="btn btn-dark w-40">Sent OTP</button>
+        </div>
+    </form>
+    
+    
+    </div>
+  </main>
+{%endblock%}

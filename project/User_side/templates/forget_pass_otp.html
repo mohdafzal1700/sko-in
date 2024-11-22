@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+    <main>
+        <div class="otp-container">
+            <h2>Enter the OTP</h2>
+            <form id="otp-form" method="POST" action="{% url 'otp_pass_validation' %}">
+                {% csrf_token %} 
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" name="otp1" required>
+                    <input type="text" maxlength="1" name="otp2" required>
+                    <input type="text" maxlength="1" name="otp3" required>
+                    <input type="text" maxlength="1" name="otp4" required>
+                    <input type="text" maxlength="1" name="otp5" required>
+
+                    
+                </div>
+                <button type="submit" class="validate-btn">Validate</button>
+            </form>
+            <p id="timer">01:00</p>
+            
+        </div>
+    </main>
+
+    
+    <script>
+        let timerElement = document.getElementById('timer');
+        let resendLink = document.getElementById('resend-link');
+        let interval;  // Store interval reference to clear later
+    
+        // Function to calculate and display countdown
+        const startTimer = (timeLeft) => {
+            clearInterval(interval);  // Clear previous timer if running
+    
+            interval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(interval);  // Stop timer when expired
+                    timerElement.textContent = "OTP expired";  // Show expiry message
+                    resendLink.style.display = 'inline';  // Show resend link
+                } else {
+                    let minutes = Math.floor(timeLeft / 60);
+                    let seconds = timeLeft % 60;
+                    timerElement.textContent = `0${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;  // Update display
+                    timeLeft--;
+                }
+            }, 1000);
+        };
+    
+        // Calculate initial countdown time from Django template
+        let expiryTime = new Date("{{ expiry_time }}").getTime();
+        let timeLeft = Math.floor((expiryTime - new Date().getTime()) / 1000);
+    
+        // Start countdown on page load
+        window.onload = () => startTimer(timeLeft);
+    
+        // Handle resend OTP click event
+        resendLink.addEventListener('click', (event) => {
+            event.preventDefault();  // Prevent default link behavior
+            resendLink.style.display = 'none';  // Hide resend link
+            timerElement.textContent = "Sending new OTP...";  // Show sending message
+    
+            // Send POST request to resend OTP
+            fetch("{% url 'resend_otp' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for security
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to resend OTP');
+                }
+                // Since we are no longer using JSON, we assume the OTP was sent successfully
+                timerElement.textContent = "New OTP sent. Please check your email."; // Temporary message
+                // Restart the countdown immediately
+                expiryTime = new Date(Date.now() + 60 * 1000).getTime();  // 1 minute from now
+                timeLeft = 60; // Reset countdown to 60 seconds
+                startTimer(timeLeft);  // Restart countdown
+            })
+            .catch(error => {
+                console.error('Error resending OTP:', error);
+                alert('Failed to resend OTP. Please try again.');
+                resendLink.style.display = 'inline';  // Show resend link on error
+                timerElement.textContent = "OTP expired";  // Display expiry message
+            });
+        });
+    </script>
+    {% endblock %}

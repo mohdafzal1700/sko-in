@@ -1,0 +1,519 @@
+{% extends 'admin_base.html' %}
+{% load custom_tags %}
+
+
+{% block content %}
+    <title>Add Product Variant</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <style>
+        .cropper-container {
+            direction: ltr;
+            font-size: 0;
+            line-height: 0;
+            position: relative;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        .cropper-wrap-box,
+        .cropper-canvas,
+        .cropper-drag-box,
+        .cropper-crop-box,
+        .cropper-modal {
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+        
+        .cropper-drag-box {
+            background-color: transparent;
+            opacity: 0;
+        }
+        
+        .cropper-modal {
+            background-color: #000;
+            opacity: 0.5;
+        }
+        
+        .cropper-view-box {
+            display: block;
+            height: 100%;
+            outline: 1px solid #39f;
+            outline-color: rgba(51, 153, 255, 0.75);
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .cropper-dashed {
+            border: 0 dashed #eee;
+            display: block;
+            opacity: 0.5;
+            position: absolute;
+        }
+        
+        .cropper-center {
+            display: block;
+            height: 0;
+            left: 50%;
+            opacity: 0.75;
+            position: absolute;
+            top: 50%;
+            width: 0;
+        }
+        
+        .cropper-face,
+        .cropper-line,
+        .cropper-point {
+            display: block;
+            height: 100%;
+            opacity: 0.1;
+            position: absolute;
+            width: 100%;
+        }
+        
+        .cropper-face {
+            background-color: #fff;
+            left: 0;
+            top: 0;
+        }
+        
+        .cropper-line {
+            background-color: #39f;
+        }
+        
+        .cropper-point {
+            background-color: #39f;
+            height: 5px;
+            opacity: 0.75;
+            width: 5px;
+        }
+        
+        /* Make the cropping frame more visible */
+        .cropper-crop-box {
+            border: 1px solid #39f;
+        }
+        
+        .cropper-point {
+            background-color: #39f;
+            height: 10px;
+            width: 10px;
+            opacity: 0.9;
+        }
+        
+        .cropper-point.point-n,
+        .cropper-point.point-s,
+        .cropper-point.point-e,
+        .cropper-point.point-w {
+            height: 10px;
+            width: 10px;
+        }
+        
+        /* Custom styles */
+        .delete-btn {
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            border-radius: 50%;
+            font-size: 20px;
+            line-height: 1;
+            z-index: 100;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        #cropperImageContainer {
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 40px;
+        }
+
+        .variant-form {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-control {
+            border-radius: 6px;
+        }
+
+        .btn {
+            border-radius: 6px;
+        }
+
+        /* Cropper modal styles */
+        .cropper-modal {
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Image preview container */
+        .preview-container img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        /* Delete button styling */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #ff5b5b;
+            background-color: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Button for adding new variant */
+        .add-variant-btn {
+            display: block;
+            width: 100%;
+            background-color: #17a2b8;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Add Variants for {{ product.name }}</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="variantForm" novalidate>
+            {% csrf_token %}
+            
+            <div id="variantsContainer">
+                <div class="variant-form">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="color: #343a40;">Size</label>
+                                <select name="size" class="form-control" required>
+                                    {% for size_value, size_display in SIZE_CHOICES %}
+                                        <option value="{{ size_value }}" {% if size_value == request.POST.size %}selected{% endif %}>
+                                            {{ size_display }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="color: #343a40;">Color</label>
+                                <select name="color" class="form-control" required>
+                                    {% for color_value, color_display in COLOR_CHOICES %}
+                                        <option value="{{ color_value }}" {% if color_value == request.POST.color %}selected{% endif %}>
+                                            {{ color_display }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="color: #343a40;">Stock</label>
+                                <input type="number" name="stock" class="form-control" min="0"   value="{{ request.POST.stock }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label  style="color: #343a40;">Price</label>
+                                <input type="number" name="price" class="form-control" step="0.01" min="0"  value="{{ request.POST.price }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label>Images (Minimum 4 required)</label>
+                            <div class="image-upload-container">
+                                {% for i in 4|range %}
+                                <div class="mb-2">
+                                    <input type="file" 
+                                           name="image_{{ i }}" 
+                                           class="form-control image-input" 
+                                           accept="image/*"
+                                           onchange="handleImageSelect(this, {{ i }})">
+                                    <div id="preview_{{ i }}" class="preview-container"></div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary mt-3" onclick="addVariantForm()">
+                Add Another Variant
+            </button>
+            
+            <button type="submit" class="btn btn-primary mt-3">
+                Save Variants
+            </button>
+
+            <a href="{% url 'products' %}" class="btn btn-secondary mt-3 ms-2">
+                Go Back to Product View
+            </a>
+        </form>
+    </div>
+
+    <!-- Cropper Modal -->
+    <!-- Cropper Modal -->
+<div class="cropper-container" id="cropperModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div class="card" style="max-width: 800px; margin: 2rem auto;">
+        <div class="card-body">
+            <div id="cropperImageContainer" style="max-height: 40vh; overflow: auto;">
+                <img id="cropperImage" style="max-width: 30%; display: block;" />
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-primary" id="cropButton" onclick="cropImage()">Crop & Save</button>
+                <button class="btn btn-secondary" onclick="cancelCrop()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+   
+    <!-- Include required JavaScript -->
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    
+        <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+        <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        let cropper;
+        let currentImageInput;
+        let currentPreviewContainer;
+        
+        function handleImageSelect(input, index) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                currentImageInput = input;
+                currentPreviewContainer = document.getElementById(`preview_${index}`);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    showImage(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function showImage(imageSrc) {
+            const modal = document.getElementById('cropperModal');
+            const imageElement = document.getElementById('cropperImage');
+        
+            // Destroy existing cropper if any
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        
+            // Show the image and modal
+            imageElement.src = imageSrc;
+            imageElement.style.display = 'block';
+            modal.style.display = 'block';
+            
+            // Initialize cropper
+            initializeCropper();
+        }
+        
+        function initializeCropper() {
+            const imageElement = document.getElementById('cropperImage');
+        
+            // Initialize cropper with manual controls
+            cropper = new Cropper(imageElement, {
+                viewMode: 1,
+                dragMode: 'crop',
+                aspectRatio: NaN,
+                autoCropArea: 0.8,
+                movable: true,
+                rotatable: false,
+                scalable: false,
+                zoomable: true,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                minContainerWidth: 200,
+                minContainerHeight: 200,
+                background: true,
+                responsive: true,
+                restore: false,
+                checkCrossOrigin: false
+            });
+        
+            // Show the crop button only after the image is loaded
+            document.getElementById('cropButton').style.display = 'inline-block';
+        }
+        
+        function cropImage() {
+            if (!cropper) return;
+        
+            const croppedCanvas = cropper.getCroppedCanvas({
+                maxWidth: 409,
+                maxHeight: 400,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+        
+            const croppedImage = new Image();
+            croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 0.9);
+            croppedImage.style.maxWidth = '100%';
+            croppedImage.style.height = 'auto';
+        
+            // Create container for image and delete button
+            const container = document.createElement('div');
+            container.style.position = 'relative';
+            container.style.display = 'inline-block';
+        
+            // Add delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '×';
+            deleteButton.className = 'btn btn-danger delete-btn';
+            deleteButton.style.position = 'absolute';
+            deleteButton.style.right = '5px';
+            deleteButton.style.top = '5px';
+            deleteButton.style.padding = '0 8px';
+            deleteButton.onclick = function() {
+                deleteImage(currentImageInput, currentPreviewContainer);
+                deleteButton.style.display = 'none';
+            };
+        
+            // Add image and delete button to container
+            container.appendChild(croppedImage);
+            {% comment %} container.appendChild(deleteButton); {% endcomment %}
+        
+            // Clear preview container and add new container
+            currentPreviewContainer.innerHTML = '';
+            currentPreviewContainer.appendChild(container);
+        
+            // Convert canvas to blob and set to file input
+            croppedCanvas.toBlob((blob) => {
+                const file = new File([blob], 'cropped_image.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                currentImageInput.files = dataTransfer.files;
+            }, 'image/jpeg', 0.9);
+        
+            // Reset and hide cropper modal
+            resetCropper();
+        }
+        
+        function deleteImage(input, previewContainer) {
+            input.value = '';
+            previewContainer.innerHTML = '';
+        }
+        
+        function cancelCrop() {
+            resetCropper();
+        }
+        
+        function resetCropper() {
+            const modal = document.getElementById('cropperModal');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            modal.style.display = 'none';
+            document.getElementById('cropperImage').style.display = 'none';
+            document.getElementById('cropButton').style.display = 'none'; // Hide the crop button again
+        }
+            
+        function addVariantForm() {
+            const container = document.getElementById('variantsContainer');
+            const variantForms = container.getElementsByClassName('variant-form');
+            const newForm = variantForms[0].cloneNode(true);
+            
+            // Clear all inputs in the new form
+            newForm.querySelectorAll('input').forEach(input => {
+                input.value = '';
+                if (input.type === 'file') {
+                    const index = variantForms.length * 4 + parseInt(input.name.split('_')[1]);
+                    input.name = `image_${index}`;
+                    input.onchange = function() { handleImageSelect(this, index); };
+                }
+            });
+            
+            // Clear preview containers
+            newForm.querySelectorAll('.preview-container').forEach(container => {
+                container.innerHTML = '';
+                const index = container.id.split('_')[1];
+                container.id = `preview_${parseInt(index) + variantForms.length * 4}`;
+            });
+            
+            container.appendChild(newForm);
+        }
+
+        // Form validation before submit
+        document.getElementById('variantForm').onsubmit = function(e) {
+            const forms = document.getElementsByClassName('variant-form');
+            for (let form of forms) {
+                const imageInputs = form.querySelectorAll('input[type="file"]');
+                let imageCount = 0;
+                imageInputs.forEach(input => {
+                    if (input.files && input.files.length > 0) imageCount++;
+                });
+                
+                if (imageCount < 4) {
+                    alert('Please upload at least 4 images for each variant.');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            return true;
+        };
+    </script>
+  
+    {% endblock %}

@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}home Page{% endblock %}
+
+{% block content %} 
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+
+    .col-5th {
+      width: 20%; /* Each item takes 1/5th of the row */
+      max-width: 20%; /* Prevents overflowing */
+    }
+  
+    @media (max-width: 992px) { /* For medium screens */
+      .col-5th {
+        width: 33.33%; /* 3 items per row */
+      }
+    }
+  
+    @media (max-width: 576px) { /* For small screens */
+      .col-5th {
+        width: 50%; /* 2 items per row */
+      }
+    }
+     .hero-section {
+      background-color: #800020;
+      height: 600px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    
+    .brand-card:hover {
+      border-color: #d1d1d1;
+    }
+
+    .brand-card span {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: #6c757d;
+      transition: color 0.2s;
+    }
+
+    .brand-card:hover span {
+      color: #ffffff;
+    }
+
+  
+
+    .product-showcase img {
+      object-fit: cover;
+    }
+
+    .product-btn {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+    }
+
+    /* CSS Custom Properties for login images */
+    :root {
+      --duration-extended: 3s;
+      --ease-out-slow: cubic-bezier(0, 0, .3, 1);
+      --animation-slide-in: slideIn var(--duration-extended) var(--ease-out-slow) forwards;
+      --animation-fade-in: fadeIn var(--duration-extended) var(--ease-out-slow);
+    }
+
+    /* Media query for scroll-triggered animations */
+    @media (prefers-reduced-motion: no-preference) {
+      .scroll-trigger:not(.scroll-trigger--offscreen).animate--slide-in {
+        animation: var(--animation-slide-in);
+        animation-delay: calc(var(--animation-order) * 100ms);
+      }
+    }
+
+    /* Container for the three separate images */
+    .image-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px; /* Space between each image container */
+      max-width: 100%;
+      padding: 20px;
+      align-items: center;
+    }
+
+    /* Styling for each image container */
+    .image-container {
+      width: 100%;
+      max-width: auto; /* Optional max-width for large screens */
+      height: 60vh; /* Set a fixed height for all images */
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Adds a shadow */
+      border-radius: 10px; /* Rounds corners */
+      position: relative;
+    }
+
+    /* Styling for each image */
+    .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Ensures image covers container without distortion */
+      object-position: center; /* Center image within container */
+      position: absolute;
+      transition: transform 20s ease-in-out; /* Slow transition for zoom effect */
+      animation: zoom 20s infinite alternate; /* Continuous zoom effect */
+    }
+    @keyframes fadeDown {
+      from {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
+  
+  /* Initial hidden state for the section */
+  .section-fade {
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  /* Class to trigger the animation */
+  .fade-in {
+      animation: fadeDown 7s forwards;
+  }
+  
+
+    /* Keyframes for continuous zoom animation */
+    @keyframes zoom {
+      0% {
+        transform: scale(1); /* Starting scale */
+      }
+      100% {
+        transform: scale(1.1); /* Zoomed-in scale */
+      }
+    }
+    .breadcrumb-item a:hover {
+      text-decoration: underline;
+      opacity: 1;
+    }
+    
+  </style>
+</head>
+
+<body>
+  <!-- Breadcrumb Section -->
+  <nav aria-label="breadcrumb" class="bg-dark p-3 rounded shadow-sm">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}" class="text-decoration-none text-white fw-semibold" style="opacity: 0.8;">Home</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'product_list' %}" class="text-decoration-none text-white fw-semibold" style="opacity: 0.8;">Shop</a>
+      </li>
+      <li class="breadcrumb-item active text-light fw-bold" aria-current="page">Current Page</li>
+    </ol>
+  </nav>
+  
+  <div class="d-flex flex-column min-vh-100">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="{% static 'video/Video_Title_HD_1080p.mp4.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    
+
+    <!-- Shop By Brand Section -->
+    <section class="text-white py-5 section-fade" id="shopByBrandSection">
+      <div class="container">
+        <div data-aos="fade-up"
+     data-aos-anchor-placement="top-center">
+</div>
+          <h2 class="fw-bold text-uppercase mb-5">Shop by Brand</h2>
+          <div class="row g-4">
+            <!-- Brand cards -->
+            <div class="col-5th">
+             <a href="{% url 'categoryview' 'Nike' %}"  class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none" style="background-color: black;">
+                <img src="{% static 'images/IMG_5154.webp' %}" alt="Nike" class="img-fluid" height="100" width="250">
+                <span class="mt-2 text-white">Nike &rarr;</span>
+              </a>
+            </div>
+    
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'Adidas' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5133.webp' %}" 
+                   alt="Adidas" 
+                   class="img-fluid" 
+                   height="100" 
+                   width="250">
+              <span class="mt-2 text-white">Adidas &rarr;</span>
+            </a>
+          </div>
+    
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'Air Jordan' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5135.webp' %}" 
+                   alt="Air Jordan" 
+                   class="img-fluid" 
+                   height="100" 
+                   width="250">
+              <span class="mt-2 text-white">Air Jordan &rarr;</span>
+            </a>
+          </div>
+    
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'Puma' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5147.webp' %}" 
+                   alt="Puma" 
+                   class="img-fluid" 
+                   height="100" 
+                   width="250">
+              <span class="mt-2 text-white">Puma &rarr;</span>
+            </a>
+          </div>
+    
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'New Balance' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5162.webp' %}" 
+                   alt="New Balance" 
+                   class="img-fluid" 
+                   height="100" 
+                   width="250">
+              <span class="mt-2 text-white">New Balance &rarr;</span>
+            </a>
+          </div>
+        
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'Louis Vuition' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5165.webp' %}" 
+                   alt="Nike" 
+                   class="img-fluid" 
+                   height="100" 
+                   width="250">
+                   <span class="mt-2 text-white">Louis Vuition &rarr;</span>
+            </a>
+          </div>
+
+          <div class="col-5th">
+            <a href="{% url 'categoryview' 'Onisuka Tiger' %}"
+               class="d-flex flex-column align-items-center justify-content-center card p-4 text-decoration-none"
+               style="background-color: black;">
+              <img src="{% static 'images/IMG_5169.webp' %}" 
+                   alt="Nike" 
+                   class="img-fluid" 
+                   height="100" 
+                 \  width="250">
+                   <span class="mt-2 text-white">Onisuka Tiger &rarr;</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Showcase Section -->
+    
+      <div>
+        <section class="product-showcase">
+          <div class="image-container scroll-trigger animate--slide-in" style="--animation-order: 1;">
+            <img src="{% static 'images/IMG_5182.webp' %}" class="image" alt="Air Jordan sneakers collection">
+            <button class="btn btn-dark px-5 py-3 product-btn">SHOP TOP BRAND</button>
+          </div>
+  
+          <div class="image-container scroll-trigger animate--slide-in" style="--animation-order: 2;">
+            <img src="{% static 'images/b933e53df0624fcb8a523a6bb3e077ad.jpg' %}" class="image" alt="Air Jordan sneakers collection">
+            <button class="btn btn-dark px-5 py-3 product-btn">SHOP QUALITY</button>
+          </div>
+  
+          <div class="image-container scroll-trigger animate--slide-in" style="--animation-order: 3;">
+            <img src="{% static 'images/0a20dffd24fa04319ee17aa1aa2777ad.jpg' %}" class="image" alt="Air Jordan sneakers collection">
+            <button class="btn btn-dark px-5 py-3 product-btn">SHOP OFFER</button>
+          </div>
+        </section>
+      </div>
+  
+    <!-- Logout Form -->
+    {% comment %} <form action="{% url 'user_logout' %}" method="POST" class="text-center my-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+
+  </div> {% endcomment %}
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const section = document.getElementById("shopByBrandSection");
+    section.classList.add("fade-in");
+});
+</script>
+
+<script>
+  AOS.init();
+</script>
+
+  {% endblock %}

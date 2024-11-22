@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order List{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #18181b;
+    color: #fff;
+    font-family: 'Pantano Sans', sans-serif;
+  }
+
+  .bg-zinc-800 {
+    background-color: #27272a;
+  }
+
+  .bg-zinc-900 {
+    background-color: #18181b;
+  }
+
+  .bg-red-500 {
+    background-color: #ef4444;
+  }
+
+  .profile-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .profile-details {
+    text-align: left;
+  }
+
+  .form-control {
+    background-color: white;
+    color: black;
+  }
+
+  h5 {
+    cursor: pointer;
+  }
+
+  .dull-hover {
+    color: #dc3545;
+    transition: color 0.3s ease;
+  }
+
+  .dull-hover:hover {
+    color: #a71c24;
+    opacity: 0.7;
+  }
+
+  /* Order Card Styling */
+  .order-card {
+    background-color: #2c2c2e;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .order-item img {
+    border-radius: 10px;
+    max-width: 100px;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .order-status {
+    padding: 5px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+  }
+
+  .order-status.pending {
+    background-color: #fcd34d;
+    color: #333;
+  }
+
+  .order-status.processing {
+    background-color: #60a5fa;
+    color: #fff;
+  }
+
+  .order-status.shipped {
+    background-color: #34d399;
+    color: #fff;
+  }
+
+  .order-status.delivered {
+    background-color: #10b981;
+    color: #fff;
+  }
+
+  .order-price {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  /* Button Styling */
+  .action-buttons a,
+  .action-buttons button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .cancel-btn {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .cancel-btn:hover {
+    opacity: 0.8;
+  }
+
+  .return-btn {
+    background-color: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+  }
+
+  .return-btn:hover {
+    opacity: 0.8;
+  }
+
+  .view-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .view-btn:hover {
+    opacity: 0.8;
+  }
+  .modal-body {
+    text-align: left !important;
+}
+
+.modal-body p, .modal-body h6 {
+    margin-left: 0 !important; /* Ensure no extra margin is applied */
+}.modal-body {
+  text-align: left !important;
+}
+
+.modal-body p, .modal-body h6 {
+  margin-left: 0 !important; /* Ensure no extra margin is applied */
+}
+
+</style>
+
+<div class="container-fluid min-vh-100 p-4 d-flex gap-4">
+  <!-- Sidebar -->
+  <div class="d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 16rem;">
+    <h5 class="fw-semibold mb-2">Manage My Account</h5>
+    <a href="{% url 'Userprofile' %}" class="text-decoration-none dull-hover">
+      <p class="text-danger ms-3 mb-3 mt-4">My Profile</p>
+    </a>
+
+    <a href="{% url 'address' %}" class="text-decoration-none dull-hover">
+      <p class="text-danger ms-3 mb-3 mt-4">My Address</p>
+    </a>
+
+    <div>
+      <h5 class="fw-semibold mb-2" data-bs-toggle="collapse" data-bs-target="#orderList" aria-expanded="false" aria-controls="orderList">
+        My Orders
+      </h5>
+      <div class="collapse" id="orderList">
+        <ul class="ms-3 mb-4 list-unstyled">
+          <li><a href="{% url 'userorders' %}?status=all" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">All Orders</p></a></li>
+          <li><a href="{% url 'userorders' %}?status=cancelled" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Cancelled Item</p></a></li>
+          <li><a href="{% url 'userorders' %}?status=returned" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Return Item</p></a></li>
+          <li><a href="{% url 'userorders' %}?status=processing" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Processing Item</p></a></li>
+        </ul>
+      </div>
+
+      <h5 class="fw-semibold">My Wallet</h5>
+      <button type="button" class="btn btn-danger w-100 mt-4">
+        <i class="bi bi-box-arrow-right me-2"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-fill card bg-zinc-800 text-white p-4">
+    <h1 class="display-6 mb-4 text-center">My Orders</h1>
+
+    <div class="container my-5">
+      <div class="w-100 mx-auto p-4 bg-dark rounded-4 shadow-lg">
+        <div class="card bg-secondary text-white mb-4">
+          <div class="card-header bg-dark d-flex justify-content-between">
+            <div><strong>Product</strong></div>
+            <div class="text-end"><strong>Price/Date</strong></div>
+          </div>
+          <div id="orders-list" class="list-group list-group-flush">
+            {% for order_item in orders %}
+              <div class="order-card">
+                <div class="order-header">
+                  <div><strong>Order #{{ order_item.id }}</strong></div>
+                  <div class="text-end">{{ order_item.order.added_date|date:"d/m/Y" }}</div>
+                </div>
+                <div class="order-item">
+                  {% with image=order_item.variant.images.first %}
+                    {% if image %}
+                      <img src="{{ image.image.url }}" alt="{{ order_item.product_name }}">
+                    {% else %}
+                      <img src="path/to/default/image.jpg" alt="Default Image">
+                    {% endif %}
+                  {% endwith %}
+                  <div>
+                    <h4 class="mb-1">{{ order_item.product_name }}</h4>
+                    <div>Quantity: {{ order_item.quantity }}</div>
+                    <div class="order-status {% if order_item.status == 'Pending' %}pending{% elif order_item.status == 'Processing' %}processing{% elif order_item.status == 'Shipped' %}shipped{% elif order_item.status == 'Delivered' %}delivered{% endif %}">
+                      {{ order_item.status }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-end">
+                  <div class="order-price">₹{{ order_item.get_total_price }}</div>
+                </div>
+
+                <div class="action-buttons">
+                  <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#orderModal{{ order_item.order.id }}">View</button>
+
+                  {% if order_item.status == "Pending" %}
+                    <a href="javascript:void(0);" onclick="showCancelReasonForm({{ order_item.id }})" class="cancel-btn">Cancel</a>
+                    <div id="cancel-reason-form-{{ order_item.id }}" style="display: none; margin-top: 10px;">
+                      <form action="{% url 'cancelorder' order_item.id %}" method="post">
+                        {% csrf_token %}
+                        <label for="cancel_reason_{{ order_item.id }}">Cancel Reason:</label>
+                        <textarea name="cancel_reason" id="cancel_reason_{{ order_item.id }}" class="form-control" required></textarea>
+                        <button type="submit" class="btn btn-danger btn-sm mt-2">Submit Cancellation</button>
+                      </form>
+                    </div>
+                  {% elif order_item.status == "Delivered" %}
+                    <a href="javascript:void(0);" onclick="showReturnReasonForm({{ order_item.id }})" class="return-btn">Return</a>
+                    <div id="return-reason-form-{{ order_item.id }}" style="display: none; margin-top: 10px;">
+                      <form action="{% url 'returnorder' order_item.id %}" method="post">
+                        {% csrf_token %}
+                        <label for="return_reason_{{ order_item.id }}">Return Reason:</label>
+                        <textarea name="return_reason" id="return_reason_{{ order_item.id }}" class="form-control" required></textarea>
+                        <button type="submit" class="btn btn-outline-light btn-sm mt-2">Submit Return</button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% for order_item in orders %}
+<!-- Order Details Modal -->
+<div class="modal fade text-light" id="orderModal{{ order_item.order.id }}" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: #2b2b2b; border-radius: 10px;">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="orderModalLabel">Order Details - Order #{{ order_item.order.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-left"> <!-- Add text-left here -->
+                <!-- Customer Information -->
+                <div class="mb-4 ms-0"> <!-- Add ms-0 to remove left margin if needed -->
+                    <h6 class="text-primary">Customer Information</h6>
+                    <p><strong>Name:</strong> {{ order_item.order.user.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ order_item.order.user.email }}</p>
+                </div>
+
+                <!-- Shipping and Payment Information -->
+                <div class="mb-4 ms-0">
+                    <h6 class="text-primary">Shipping & Payment</h6>
+                    <div class="shipping-address">
+                        <p><span class="address-type">{{ order_item.order.shipping_address.address_type|upper }}</span>
+                        <span class="address-label">{{ order_item.order.shipping_address.label }}</span></p>
+                        <p>{{ order_item.order.shipping_address.address_line_1 }} {{ order_item.order.shipping_address.address_line_2 }}</p>
+                        <p>{{ order_item.order.shipping_address.city }} {{ order_item.order.shipping_address.state }}</p>
+                        <p>{{ order_item.order.shipping_address.country }}</p>
+                        <p>{{ order_item.order.shipping_address.postal_code }}</p>
+                    </div>
+                    <p><strong>Payment Date:</strong> {{ order_item.order.payment_date|date:"d/m/Y" }}</p>
+                    <p><strong>Payment Method:</strong> {{ order_item.order.paymentmethod.name }}</p>
+                    <p><strong>Total Amount:</strong> ₹{{ order_item.order.total_amount }}</p>
+                    <p><strong>Order Status:</strong> 
+                        <span class="badge bg-{{ order_item.status|lower }}">{{ order_item.status }}</span>
+                    </p>
+                </div>
+
+                <!-- Order Items -->
+                <div class="mb-4 ms-0">
+                    <h6 class="text-primary">Order Items</h6>
+                    <table class="table table-dark table-striped table-hover" style="color: white;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_item.order.order_items.all %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹{{ item.price }}</td>
+                                <td>₹{{ item.get_total_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
+<script>
+  // Toggle visibility of cancel reason form
+  function showCancelReasonForm(orderItemId) {
+    const form = document.getElementById(`cancel-reason-form-${orderItemId}`);
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  }
+
+  // Toggle visibility of return reason form
+  function showReturnReasonForm(orderItemId) {
+    const form = document.getElementById(`return-reason-form-${orderItemId}`);
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  }
+</script>
+
+{% endblock %}

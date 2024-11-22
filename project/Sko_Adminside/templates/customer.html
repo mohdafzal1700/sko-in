@@ -1,0 +1,177 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+.table th, .table td {
+    padding: 12px; /* Consistent padding for smooth alignment */
+    vertical-align: middle; /* Center content vertically */
+    text-align: center; /* Center align text in both header and body */
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Smooth hover effect */
+}
+.table-container {
+    padding: 15px;
+}
+</style>
+
+
+
+
+
+<div>
+    <div class="d-flex mt-3">
+        <div class="sidebar">
+            <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
+            <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
+            <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
+            <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
+            <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
+            <a href="{% url 'offer' %}" data-section="banner"><i class="fa fa-image"></i> Offers</a>
+            <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
+        </div>
+        <div class="main-content">
+            <!-- Product Management and Table -->
+            <div class="product-management-section mb-4">
+                <div class="d-flex align-items-center mb-2 sticky-button-section">  <!-- Use flexbox for alignment -->
+                    <button class="btn btn-dark me-2">CUSTOMERS</button>  <!-- Add margin for spacing -->
+                    <form method="POST" action="{% url 'searchcustomer' %}" class="ms-2" id="searchForm">
+                        {% csrf_token %}
+                        <input type="text" name="search" id="searchInput" class="form-control d-inline-block w-auto search-bar" value="{{ search }}" placeholder="Search" />
+                    </form>
+                </div>
+            </div>
+                <!-- Table Header Section -->
+                <div class="table-header">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th class="price-header me-1">Name</th>
+                                <th class="stock-header">Email</th>
+                                <th class="category-header">Joindate</th>
+                                <th class="edit-header">Edit</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+                <!-- Table Body Section -->
+                <div class="table-container mt-3" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-dark table-hover">
+                        <tbody>
+                            {% for user in data %}
+                            <tr class="custom-row">
+                                <td class="product-body">
+                                    {{ user.username }}
+                                </td>
+                                <td class="price-body">{{ user.email }}</td>
+                                <td class="price-body">{{ user.date_joined }}</td>
+                                <!-- User Action Row -->
+                                <td class="edit-or-delete-body">
+                                    {% if user.is_superuser %}
+                                    Superuser
+                                    {% else %}
+                                    <button class="btn {% if not user.is_active %}btn-unblock{% else %}btn-block{% endif %}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmationModal"
+                                        data-user-id="{{ user.id }}"
+                                        data-user-action="{% if not user.is_active %}unblock{% else %}block{% endif %}">
+                                        {% if not user.is_active %}
+                                        Unblock
+                                        {% else %}
+                                        Block
+                                        {% endif %}
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="color: black;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to <span id="userAction"></span> this user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmActionBtn" class="btn btn-danger">Yes, <span id="confirmActionText"></span></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmActionBtn = document.getElementById('confirmActionBtn');
+        const userActionSpan = document.getElementById('userAction');
+        const confirmActionText = document.getElementById('confirmActionText');
+
+        // Listen for when the modal is triggered to be shown
+        confirmationModal.addEventListener('show.bs.modal', (event) => {
+            const button = event.relatedTarget;
+            const userId = button?.getAttribute('data-user-id');
+            const userAction = button?.getAttribute('data-user-action');
+
+            if (!userId || !userAction) {
+                console.error('User ID or action is missing.');
+                return;
+            }
+
+            userActionSpan.textContent = userAction;
+            confirmActionText.textContent = userAction;
+            confirmActionBtn.href = `/toggle_block_user/${userId}/`;
+        });
+
+        // Automatic reload every 5 seconds (5000 milliseconds)
+        setInterval(() => {
+            location.reload();
+        }, 5000);
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("searchInput");
+        const searchForm = document.getElementById("searchForm");
+
+        // Function to debounce input events
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Input event listener for submitting the form on input
+        searchInput.addEventListener("input", debounce(function() {
+            const inputValue = searchInput.value.trim();
+
+            // Automatically submit the form if there is input
+            if (inputValue.length > 0) {
+                searchForm.submit();
+            }
+        }, 300)); // Debounce for 300ms
+    });
+</script>
+
+{% endblock %}

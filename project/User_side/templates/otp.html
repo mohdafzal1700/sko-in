@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <div class="otp-container">
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+        <h2>Enter the OTP</h2>
+        <form id="otp-form" method="POST" action="{% url 'otp' %}">
+            {% csrf_token %}
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" name="otp1" required>
+                <input type="text" maxlength="1" name="otp2" required>
+                <input type="text" maxlength="1" name="otp3" required>
+                <input type="text" maxlength="1" name="otp4" required>
+                <input type="text" maxlength="1" name="otp5" required>
+            </div>
+            <button type="submit" class="validate-btn">Validate</button>
+        </form>
+        <p id="timer">01:00</p>
+        <p>Didn’t get the code? <a href="#" id="resend-link" style="display: none;">Resend</a></p>
+    </div>
+</main>
+
+<script>
+    let timerElement = document.getElementById('timer');
+    let resendLink = document.getElementById('resend-link');
+    let interval;
+
+    const startTimer = (timeLeft) => {
+        clearInterval(interval);
+        interval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                timerElement.textContent = "OTP expired";
+                resendLink.style.display = 'inline';
+            } else {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerElement.textContent = `0${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                timeLeft--;
+            }
+        }, 1000);
+    };
+
+    let expiryTime = new Date("{{ expiry_time }}").getTime();
+    let timeLeft = Math.floor((expiryTime - new Date().getTime()) / 1000);
+
+    window.onload = () => startTimer(timeLeft);
+
+    resendLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        resendLink.style.display = 'none';
+        timerElement.textContent = "Sending new OTP...";
+        
+        fetch("{% url 'resend_otp' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to resend OTP');
+            timerElement.textContent = "New OTP sent. Please check your email.";
+            expiryTime = new Date(Date.now() + 60 * 1000).getTime();
+            timeLeft = 60;
+            startTimer(timeLeft);
+        })
+        .catch(error => {
+            console.error('Error resending OTP:', error);
+            alert('Failed to resend OTP. Please try again.');
+            resendLink.style.display = 'inline';
+            timerElement.textContent = "OTP expired";
+        });
+    });
+</script>
+{% endblock %}

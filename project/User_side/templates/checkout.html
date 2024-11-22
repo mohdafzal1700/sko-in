@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Aclonica&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+  
+
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+    }
+    .bg-dark-grey {
+      background-color: #212529;
+    }
+    .border-neutral {
+      border-color: #343a40;
+    }
+    .text-neutral {
+      color: #adb5bd;
+    }
+    .custom-checkbox .form-check-input:checked {
+      background-color: #adb5bd;
+      border-color: #adb5bd;
+    }
+    .custom-radio .form-check-input:checked {
+      background-color: #adb5bd;
+      border-color: #adb5bd;
+    }
+    input:focus-within {
+      color: black;
+      background-color: #212529; /* Keep the same dark color when focused */
+      border-color: #343a40;
+    }
+  
+    /* Prevent input field color change on hover */
+    .form-control:hover,
+    .form-control:focus {
+      background-color: #212529 !important; /* Keep dark background on hover/focus */
+    
+      color: #fff !important; /* Ensure text color stays white */
+    }
+  
+    /* Disable input fields by default */
+    .disabled-input {
+      background-color: #212529;
+      border-color: #343a40;
+      color: #6c757d; /* Lighter color for disabled inputs */
+    }
+  
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  
+    .offcanvas-body {
+      background-color: #800020; /* Dark background for better contrast */
+      padding: 30px 20px;
+      font-family: 'Inter', sans-serif;
+    }
+  
+    .offcanvas-body ul {
+      padding-left: 0; /* Remove default list padding */
+      list-style: none; /* Remove bullet points */
+    }
+  
+    .offcanvas-body li {
+      margin-bottom: 15px; /* Spacing between items */
+    }
+  
+    .offcanvas-body a {
+      color: #ffffff; /* White text color */
+      text-decoration: none;
+      font-size: 1.25rem; /* Increase font size */
+      font-weight: 500; /* Make the font slightly bolder */
+      transition: color 0.3s ease; /* Smooth color change */
+    }
+  
+    .offcanvas-body a:hover {
+      color: #d4af37; /* Gold color on hover for contrast */
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body> 
+  
+  </head>
+  <body class="bg-black text-white d-flex flex-column min-vh-100">
+    <nav class="d-flex justify-content-between align-items-center p-3 sticky-top bg-black" 
+           style="font-family: 'Aclonica', sans-serif; border-bottom: 1px solid grey; z-index: 1030;">
+          <!-- Hamburger icon to open offcanvas -->
+          <div>
+              <i class="fa-solid fa-bars" style="color: white; font-size: 1.6em; cursor: pointer;" 
+                 data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"></i>
+          </div>
+  
+          <!-- Centered Heading -->
+          <h1 class="fs-2 fw ms-5" style="letter-spacing: .6em; color: white;">SKO.IN</h1>
+  
+          <!-- Placeholder for right alignment, if needed -->
+          <div>
+            <a href="{% url 'Userprofile' %}" style="text-decoration: none;">
+              <i class="fa-solid fa-user me-3" style="font-size: 1.4em; color: white;"></i>
+            </a>
+            <a href="{% url 'cart_view' %}" style="text-decoration: none;">
+              <i class="fa-solid fa-cart-shopping me-3" style="font-size: 1.4em; color: white;"></i>
+            </a>
+            
+            <i class="fa-regular fa-heart" style="font-size: 1.4em;"></i>
+          </div>
+      </nav>
+  
+      
+  
+      <!-- Offcanvas Sidebar -->
+      <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+          <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+              <ul class="list-unstyled">
+                  <li><a href="{%url 'home'%}" class="text-white text-decoration-none">Home</a></li>
+                  <li><a href="{%url 'product_list'%}" class="text-white text-decoration-none">Shop ALL</a></li>
+                  <li><a href="#" class="text-white text-decoration-none">Services</a></li>
+                  <li><a href="#" class="text-white text-decoration-none">Contact</a></li>
+                  <li><a href="{%url 'user_logout' %}" class="text-white text-decoration-none">Logout </a></li>
+              </ul>
+          </div>
+      </div>
+  
+  
+    <!-- Messages Section -->
+  
+    <!-- Messages Section -->
+    {% for message in messages %}
+    {% if message.tags == "error" %}
+      <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% elif message.tags == "success" %}
+      <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% else %}
+      <div class="alert alert-info alert-dismissible fade show custom-alert" role="alert">
+        <i class="bi bi-info-circle-fill"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endif %}
+  {% endfor %}
+  
+  
+  
+  
+
+  <div class="container py-6">
+    <div class="row g-4 justify-content-center">
+      <!-- Left Section: Forms -->
+      <div class="col-md-6">
+        <!-- Contact Section -->
+        <section class="mb-4">
+          <h2 class="h5 fw-semibold">Contact</h2>
+          <div class="mb-3">
+            <input type="email" class="form-control bg-dark-grey border-neutral text-light" placeholder="Email" value="{{ request.user.email }}" readonly>
+          </div>
+          <div class="form-check custom-checkbox mb-3">
+            <input type="checkbox" class="form-check-input border-neutral" id="newsletter">
+            <label class="form-check-label text-neutral" for="newsletter">Email me with news and offers</label>
+          </div>
+        </section>
+
+        <!-- Delivery Section -->
+        <form method="POST" action="{% url 'placeorder' %}">
+          {% csrf_token %}
+        <section class="mb-4">
+         
+          <h2 class="h5 fw-semibold">Delivery</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light disabled-input" placeholder="First name" value="{{ request.user.first_name }}" id="firstName" readonly>
+            </div>
+            <div class="col-md-6">
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light disabled-input" placeholder="Last name" value="{{ request.user.last_name }}" id="lastName" readonly>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="addressSelect" class="form-label text-neutral">Select Address</label>
+              <select class="form-select bg-dark-grey border-neutral text-light" id="addressSelect" name="address" onchange="setPrimaryAddress()">
+                {% for address in user_address %}
+                  <option value="{{ address.id }}" {% if address.is_primary %} selected {% endif %}>
+                    {{ address.label }} - {{ address.address_type }}
+                  </option>
+                {% endfor %}
+              </select>
+          </div>
+
+          <!-- Form Fields -->
+          <input type="text" class="form-control bg-dark-grey border-neutral text-light mt-3 disabled-input" id="address" placeholder="Address" readonly>
+          <input type="text" class="form-control bg-dark-grey border-neutral text-light mt-3 disabled-input" id="address1" placeholder="Apartment/Suite/etc." readonly>
+
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light disabled-input" id="city" placeholder="City" readonly>
+            </div>
+            
+            <div class="col-md-4">
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light disabled-input" id="state" placeholder="state" readonly>
+            </div>
+            <div class="col-md-4">
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light disabled-input" id="pinCode" placeholder="PIN CODE" readonly>
+            </div>
+          </div>
+
+          <!-- Phone Field -->
+          <input type="text" class="form-control bg-dark-grey border-neutral text-light mt-3 disabled-input" id="phone" placeholder="Phone" value="{{ profile.mobile|default:"No phone number available" }}" readonly>
+
+        </section>
+        <a href="{% url 'add_address' %}?next=checkout" class="btn btn-secondary mb-3">Add Address</a>
+
+
+
+        <!-- Payment Section -->
+       
+          <section class="mb-4">
+              <h2 class="h5 fw-semibold">Payment</h2>
+              <p class="text-neutral">All transactions are secure and encrypted.</p>
+              {% for method in paymentmethod %}
+                  <div class="form-check custom-radio border border-neutral rounded p-3 mb-2">
+                      <input type="radio" class="form-check-input" name="payment_method" id="{{ method.name }}" value="{{ method.name }}" {% if forloop.first %} checked {% endif %}>
+                      <label class="form-check-label text-light" for="{{ method.name }}">{{ method.name }}</label>
+                  </div>
+              {% endfor %}
+          </section>
+         
+     
+      <button type="submit" class="btn btn-secondary w-100 mt-3">Place order</button>
+    </form>
+  </div>
+
+      <!-- Right Section: Order Summary -->
+      <div class="col-md-5 ms-5">
+        <div class="card bg-dark-grey border-neutral">
+          <div class="card-body text-white">
+            <!-- Cart Item List -->
+            <div class="mb-4">
+              {% for item in cartitem %}
+              <div class="d-flex align-items-center mb-3">
+                {% with image=item.variant.images.first %}
+                  {% if image %}
+                    <img src="{{ image.image.url }}" alt="{{ item.variant.product.name }}" width="80" class="rounded me-3">
+                  {% else %}
+                    <img src="path/to/default/image.jpg" alt="Default Image" width="80" class="rounded me-3">
+                  {% endif %}
+                {% endwith %}
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <h6 class="mb-0 fw-semibold">{{ item.variant.product.name }}</h6>
+                    <span>₹{{ item.total_price }}</span>
+                  </div>
+                  <small class="d-block text">{{ item.variant.size }}</small>
+                  <small class="d-block text">{{ item.variant.color }}</small>
+                </div>
+              </div>
+              
+              {% endfor %}
+            </div>
+
+            <!-- Discount Code Section -->
+            <p >Coupons</p>
+            <div class="input-group mb-4">
+             
+              <input type="text" class="form-control bg-dark-grey border-neutral text-light" placeholder="Discount code">
+              <button class="btn btn-outline-secondary" type="button">Apply</button>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="border-top border-neutral pt-3">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal</span>
+                <span>₹{{ total_price }}</span>
+              </div>
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Total</span>
+                <span>₹{{ final_total_price }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const addresses = {{ user_address_json|safe }}; // Use the serialized JSON data
+  
+    function populateAddressFields() {
+      const selectedId = document.getElementById("addressSelect").value;
+      const selectedAddress = addresses.find(addr => addr.pk == selectedId); // Use `pk` to match the primary key
+  
+      if (selectedAddress && selectedAddress.fields) {
+        document.getElementById("address").value = selectedAddress.fields.address_line_1 || '';
+        document.getElementById("address1").value = selectedAddress.fields.address_line_2 || '';
+        document.getElementById("city").value = selectedAddress.fields.city || '';
+        document.getElementById("state").value = selectedAddress.fields.state || '';
+        document.getElementById("pinCode").value = selectedAddress.fields.postal_code || '';
+        
+  
+        const isPrimary = selectedAddress.fields.is_primary;
+        toggleAddressFields(isPrimary);
+      }
+    }
+  
+    function toggleAddressFields(isPrimary) {
+      const fields = ["address", "city", "pinCode", "address1", "phone"];
+      fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (!isPrimary) {
+          field.setAttribute('readonly', true); // Set fields to readonly if not primary
+          field.classList.add('disabled-input');
+        } else {
+          field.removeAttribute('readonly'); // Allow editing if primary
+          field.classList.remove('disabled-input');
+        }
+      });
+    }
+  
+    document.addEventListener('DOMContentLoaded', function () {
+      // Automatically populate fields with the selected address data on page load
+      populateAddressFields();
+  
+      // Listen for changes in the address dropdown and update fields automatically
+      document.getElementById("addressSelect").addEventListener("change", function() {
+        populateAddressFields();
+      });
+    });
+  </script>
+  
+  <script>
+    function setPrimaryAddress() {
+      const addressId = document.getElementById('addressSelect').value;
+  
+      fetch("{% url 'set_primary_address' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ address_id: addressId }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log("Primary address updated successfully.");
+          alert("Primary address has been updated successfully.");
+  
+          // Automatically update the address fields without page reload
+          addresses.forEach(address => address.fields.is_primary = false);
+          const selectedAddress = addresses.find(addr => addr.pk == addressId);
+          if (selectedAddress) selectedAddress.fields.is_primary = true;
+  
+          populateAddressFields(); // Refresh the form fields with the updated primary address
+        } else {
+          console.error("Failed to update the primary address.");
+          alert("Failed to update the primary address. Please try again.");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while updating the primary address.");
+      });
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+  
+  </body>
+  </html>
+  
