@@ -2,6 +2,7 @@ import random
 import re
 import os
 from django.core.exceptions import ValidationError
+from django.contrib import messages
 from django.core.mail import send_mail
 
 
@@ -112,3 +113,26 @@ def validate_phone(phone):
         raise ValidationError("Phone number should not start with a space.")
     
     return phone
+
+
+
+
+# def refund_to_wallet( request ,user, amount, product, description):
+#     try:
+#         from Sko_Adminside.models import Wallet,Transaction
+#         # Add the refund amount to the user's wallet
+#         wallet = Wallet.objects.get(user=user)
+#         wallet.credit(amount)
+
+#         # Create a transaction for the refund
+#         Transaction.objects.create(
+#              request=request, 
+#             wallet=wallet,
+#             user=request.user,
+#             amount=amount,
+#             transaction_type='credit',
+#             description=description
+#         )
+#         messages.success(request, f"₹{amount} has been successfully refunded and added to your wallet.")
+#     except Exception as e:
+#         messages.error(request, f"An error occurred while refunding to wallet: {str(e)}")

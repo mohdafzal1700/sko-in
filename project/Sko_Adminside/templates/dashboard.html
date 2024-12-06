@@ -1,17 +1,191 @@
 {% extends 'admin_base.html' %}
 
 {% block content %}
-<div>
-    <div class="d-flex mt-3">
-        <div class="sidebar">
-            <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
-            <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
-            <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
-            <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
-            <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
-            <a href="{% url 'offer' %}" data-section="banner"><i class="fa fa-image"></i> Offers</a>
-            <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
+<div class="d-flex mt-3">
+    <!-- Sidebar -->
+  
+   <!-- Main Content -->
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-flex align-items-center justify-content-between pb-4">
+        <h1 class="fs-2 fw-bold text-primary">Sales Summary</h1>
+    </div>
+
+    <!-- Filters Section -->
+    <form method="GET" action="" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control shadow-sm" value="{{ start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control shadow-sm" value="{{ end_date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="end_date" class="form-label ">Filter</label>
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
         </div>
+    </form>
+
+    <!-- Metric Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-light p-3">
+                <h5 class="text-muted">Revenue</h5>
+                <div class="fs-3 fw-bold text-success">₹{{ total_sales }}</div>
+            </div>
         </div>
-<h1>helo</h1>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-light p-3">
+                <h5 class="text-muted">Orders</h5>
+                <div class="fs-3 fw-bold text-primary">{{ total_orders }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-3 text-center">Sales Over Time</h4>
+            <canvas id="salesChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Best Selling Products & Categories -->
+    <div class="row mt-4">
+        <!-- Top Selling Products -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light p-3">
+                <h5 class="text-muted">Top 10 Best Selling Products</h5>
+                <ul id="top-products" class="list-group list-group-flush">
+                    {% for product in top_selling_products %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ product.variant__product__name }}</span>
+                        <span class="badge bg-info">{{ product.total_sales }} sold</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No products sold yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Top Selling Categories -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light p-3">
+                <h5 class="text-muted">Top 10 Best Selling Categories</h5>
+                <ul id="top-categories" class="list-group list-group-flush">
+                    {% for category in top_selling_categories %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ category.variant__product__category__name }}</span>
+                        <span class="badge bg-warning">{{ category.total_sales }} sold</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No categories sold yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get the chart data and labels from the context
+    var chartLabels = {{ chart_labels|safe }};  // This is from the Django context
+    var chartData = {{ chart_data|safe }};      // This is from the Django context
+
+    // Check the data in the console (optional)
+    console.log('Chart Labels:', chartLabels);
+    console.log('Chart Data:', chartData);
+
+    var ctx = document.getElementById('salesChart').getContext('2d');
+    var salesChart = new Chart(ctx, {
+        type: 'line',  // You can use other types like 'bar', 'pie', etc.
+        data: {
+            labels: chartLabels,  // The labels (dates)
+            datasets: [{
+                label: 'Sales Amount',
+                data: chartData,  // The sales data
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,  // Adds a shaded area under the line
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Sales (₹)'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<!-- Custom Styling -->
+<style>
+    .metric-card {
+        border: 1px solid #f0f0f0;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .list-group-item {
+        border: none;
+    }
+
+    .list-group-item .badge {
+        font-size: 0.9rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+    .text-muted {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .text-primary {
+        color: #007bff;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+</style>
 {% endblock %}

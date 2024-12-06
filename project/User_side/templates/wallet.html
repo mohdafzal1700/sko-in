@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Wallet List{% endblock %}
+
+{% block content %}
+  <style>
+    body {
+      background-color: #000;
+      color: #d1d5db;
+      font-family: 'Pantano Sans', sans-serif;
+    }
+    .bg-zinc-800 {
+      background-color: #27272a;
+    }
+    .bg-zinc-900 {
+      background-color: #18181b;
+    }
+    .card-header, .table {
+      background-color: #1a1a1a;
+    }
+    .btn-custom {
+      background-color: #333;
+      color: white;
+    }
+    .btn-custom:hover {
+      background-color: #444;
+    }
+    .text-green {
+      color: #28a745;
+    }
+    .text-red {
+      color: #dc3545;
+    }
+    .dull-hover {
+      color: #dc3545;
+      transition: color 0.3s ease;
+    }
+    .dull-hover:hover {
+      color: #a71c24;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid min-vh-100 d-flex gap-4 py-4">
+    <!-- Sidebar -->
+    <div class=" side d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 18rem;">
+      <h5 class="fw-semibold mb-2">Manage My Account</h5>
+      <a href="{% url 'Userprofile' %}" class="text-decoration-none dull-hover">
+          <p class="text-danger ms-3 mb-3 mt-4 fs-5">My Profile</p>
+      </a>
+      
+      <a href="{% url 'address' %}" class="text-decoration-none dull-hover">
+        <p class="text-danger ms-3 mb-3 mt-4 fs-6">My Address</p>
+    </a>
+      <div>
+        <h5 class="fw-semibold mb-2" data-bs-toggle="collapse" data-bs-target="#orderList" aria-expanded="false" aria-controls="orderList">
+          My Orders
+        </h5>
+        <div class="collapse" id="orderList">
+          <ul class="ms-3 mb-4 list-unstyled" >
+            <li><a href="{% url 'userorders' %}?status=all" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">All Orders</p></a></li>
+            <li><a href="{% url 'userorders' %}?status=returned" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Return Item</p></a></li>
+            <li><a href="{% url 'userorders' %}?status=Pending" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Order History</p></a></li>
+            <li><a href="{% url 'userorders' %}?status=processing" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Processing Item</p></a></li>
+          </ul>
+        
+        </div>
+  
+        <h5 class="fw-semibold">
+          <a href="{% url 'wallet' %}" class="text-decoration-none text-light">My Wallet</a>
+        </h5>
+        <button type="button" class="btn btn-danger w-100 mt-4">
+          <i class="bi bi-box-arrow-right me-2"></i> Logout
+        </button>
+      </div>
+    </div>
+  
+
+    <!-- Main Content -->
+    <div class="flex-fill card bg-zinc-800 text-white p-4">
+      <!-- Wallet Balance Section -->
+      <div class="d-flex justify-content-between align-items-center p-4 rounded-3" style="background-color: #1a1a1a;">
+        <div>
+          <h1 class="h4 fw-semibold text-light">Your Wallet</h1>
+          <div class="display-6 fw-bold text-light">₹{{ wallet.balance }}</div>
+        </div>
+        <!-- Button to open Recharge Modal -->
+        <button type="button" class="btn btn-lg btn-custom" data-bs-toggle="modal" data-bs-target="#rechargeModal">
+          Add Balance
+        </button>
+      </div>
+
+      <!-- Transaction History Section -->
+      <div class="mt-5">
+        <h2 class="h5 fw-semibold text-light">Transaction History</h2>
+
+        <!-- Wallet Recharges -->
+        <div class="card mt-3">
+          <div class="card-header border-bottom border-secondary">
+            <h5 class="text-light">Wallet Recharges</h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless table-hover text-light">
+              <thead>
+                <tr class="border-bottom border-secondary">
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Description</th>
+                  <th class="text-end">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transaction in transactions %}
+                <tr class="border-bottom border-secondary">
+                  <td>{{ transaction.timestamp }}</td>
+                  <td>₹{{ transaction.amount }}</td>
+                  <td>{{ transaction.description }}</td>
+                  <td class="text-end {% if transaction.transaction_type == 'credit' %}text-green{% else %}text-red{% endif %}">
+                    {{ transaction.transaction_type }}
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recharge Modal -->
+  <div class="modal fade" id="rechargeModal" tabindex="-1" aria-labelledby="rechargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-zinc-800 text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rechargeModalLabel">Recharge Wallet</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="rechargeForm">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="amount" class="form-label">Amount (₹)</label>
+              <input type="number" class="form-control" id="amount" name="amount" min="1" required>
+            </div>
+            <button type="button" id="rechargeButton" class="btn btn-primary w-100">Recharge</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Razorpay Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    document.getElementById('rechargeButton').addEventListener('click', function() {
+      var amount = document.getElementById('amount').value;
+
+      if (!amount || parseFloat(amount) <= 0) {
+        alert('Please enter a valid amount.');
+        return;
+      }
+
+      // Send the amount to the server to create a Razorpay order
+      fetch("{% url 'wallet_recharge' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({
+          amount: amount,
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.razorpay_order_id) {
+          var options = {
+            key: '{{ razorpay_key_id }}',  // Your Razorpay key
+            amount: data.amount * 100,  // Amount in paise
+            currency: 'INR',
+            name: 'Recharge Wallet',
+            description: 'Wallet Recharge',
+            order_id: data.razorpay_order_id,
+            handler: function(response) {
+              // Send the payment details to the server after successful payment
+              fetch("{% url 'wallet_recharge_success' %}", {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: data.razorpay_order_id,
+                })
+              })
+              .then(res => res.json())
+              .then(successData => {
+                if (successData.status === 'success') {
+                  alert('Recharge Successful!');
+                  location.reload(); // Reload the page to update the wallet balance
+                } else {
+                  alert('Recharge failed.');
+                }
+              });
+            },
+            prefill: {
+              name: '{{ user.username }}',
+              email: '{{ user.email }}',
+            },
+            theme: {
+              color: '#F37254'
+            }
+          };
+
+          var rzp = new Razorpay(options);
+          rzp.open();
+        } else {
+          alert('Failed to initiate payment. Please try again.');
+        }
+      })
+      .catch(error => {
+        alert('An error occurred. Please try again.');
+      });
+    });
+  </script>
+
+ 
+{% endblock %}

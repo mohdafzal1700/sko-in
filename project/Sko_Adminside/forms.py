@@ -114,7 +114,7 @@ class OfferForm(forms.ModelForm):
     class Meta:
         model = Offer
         fields = [
-            'Offer_type',
+            'offer_type',
             'discount_type',
             'name',
             'description',
@@ -169,6 +169,33 @@ class OfferForm(forms.ModelForm):
         if end_date and start_date and end_date <= start_date:
             raise forms.ValidationError("The end date must be after the start date.")
         return end_date
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if len(name) < 3:
+            raise forms.ValidationError("The name must have at least 3 characters.")
+        if name[0] in ['*', '#', '@', '!', '$']:  # Add other special characters as needed
+            raise forms.ValidationError("The name cannot start with a special character like * or #.")
+        return name
+
+    # Discount Value Validation
+    def clean_discount_values(self):
+        discount_values = self.cleaned_data.get('discount_values')
+        discount_type = self.cleaned_data.get('discount_type')
+        
+        if discount_values < 0:
+            raise ValidationError("Discount value cannot be negative.")
+
+        if discount_type == 'PERCENTAGE':
+            if discount_values > 100:
+                raise forms.ValidationError("The discount percentage cannot exceed 100%.")
+        elif discount_type == 'FIXED':
+            if discount_values < 0:
+                raise ValidationError("The fixed discount value cannot be negative.")
+            if discount_values > 99999 :  # Limit to 5 digits (99999)
+                raise forms.ValidationError("The discount value cannot exceed 5 digits for fixed amount.")
+        
+        return discount_values
 
 
 
@@ -221,3 +248,31 @@ class CouponForm(forms.ModelForm):
         if end_date and start_date and end_date <= start_date:
             raise ValidationError("The end date must be after the start date.")
         return end_date
+    
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        if len(code) < 3:
+            raise ValidationError("The coupon code must have at least 3 characters.")
+        if code[0] in ['*', '#', '@', '!', '$']:  # Add other special characters as needed
+            raise ValidationError("The coupon code cannot start with a special character like * or #.")
+        return code
+
+    # Discount Value Validation
+    def clean_value(self):
+        value = self.cleaned_data.get('value')
+        discount_type = self.cleaned_data.get('discount_type')
+
+        if discount_type == 'PERCENTAGE':
+            if value > 100:
+                raise ValidationError("The discount percentage cannot exceed 100%.")
+        elif discount_type == 'FIXED':
+            if value > 99999:  # Limit to 5 digits (99999)
+                raise ValidationError("The discount value cannot exceed 5 digits for fixed amount.")
+        
+        return value
+    
+    def clean_minimum_purchase_amount(self):
+        minimum_purchase_amount = self.cleaned_data.get('minimum_purchase_amount')
+        if minimum_purchase_amount is not None and minimum_purchase_amount < 0:
+            raise ValidationError("The minimum purchase amount cannot be negative.")
+        return minimum_purchase_amount

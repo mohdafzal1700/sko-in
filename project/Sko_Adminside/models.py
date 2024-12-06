@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from User_side.utils import  validate_image , validate_field, validate_phone 
 from django.utils import timezone
-
+from django.utils.timezone import now
+from django.db import transaction
+from django.contrib import messages
 
 
 
@@ -40,6 +42,31 @@ class Product(models.Model):
     def delete(self, using = None, keep_parents = False):
         self.is_delete= True
         self.save()
+        
+    def get_active_offer(self):
+        # First check if there’s a product-specific offer
+        product_offer = Offer.objects.filter(
+            product=self,
+            start_date__lte=now(),
+            end_date__gte=now()
+        ).first()
+
+        if product_offer:
+            return product_offer
+
+        # If no product-specific offer, check category-level offer
+        category_offer = Offer.objects.filter(
+            category=self.category,
+            start_date__lte=now(),
+            end_date__gte=now()
+        ).first()
+
+        return category_offer
+
+    def has_active_offer(self):
+        return self.get_active_offer() is not None
+
+
    
  
 
@@ -89,6 +116,61 @@ class Variants(models.Model):
             raise ValidationError("Stock must be greater than zero.")
         if self.price <= 0:
             raise ValidationError("Price must be greater than zero.")
+        
+        
+    def get_discounted_price(self):
+        """Calculate the discounted price for this variant based on any active offers."""
+        original_price = self.price
+
+        # Product-level offer
+        product_offer = Offer.objects.filter(
+            offer_type=Offer.PRODUCT_OFFER,
+            product=self.product,
+            is_active=True
+        ).first()
+        product_discounted_price = (
+            product_offer.apply_discount(original_price) 
+            if product_offer and product_offer.is_valid() else original_price
+        )
+        try:
+            product_discounted_price = (
+                product_offer.apply_discount(original_price) 
+                if product_offer and product_offer.is_valid() else original_price
+        )
+        except ValidationError as e:
+            # If the offer is invalid, use the original price and log the error
+            product_discounted_price = original_price
+            print(f"Error with product offer: {e}")
+
+        
+        
+
+        # Category-level offer
+        category_offer = Offer.objects.filter(
+            offer_type=Offer.CATEGORY_OFFER,
+            category=self.product.category,
+            is_active=True
+        ).first()
+        category_discounted_price = (
+            category_offer.apply_discount(original_price) 
+            if category_offer and category_offer.is_valid() else original_price
+        )
+        
+        try:
+            category_discounted_price = (
+                category_offer.apply_discount(original_price) 
+                if category_offer and category_offer.is_valid() else original_price
+            )
+        except ValidationError as e:
+            # If the offer is invalid, use the original price and log the error
+            category_discounted_price = original_price
+            print(f"Error with category offer: {e}")
+        
+        
+
+        # Return the minimum discounted price available
+        return min(product_discounted_price, category_discounted_price)
+
 
     def __str__(self):
         return f"{self.product.name} - {self.color} / Size: {self.size}"
@@ -173,7 +255,7 @@ class Offer(models.Model):
     ]
     
     
-    Offer_type=models.CharField(max_length=20,choices=OFFER_TYPES,default=PRODUCT_OFFER)
+    offer_type=models.CharField(max_length=20,choices=OFFER_TYPES,default=PRODUCT_OFFER)
     discount_type = models.CharField(max_length=1, choices=DISCOUNT_TYPES, default=PERCENTAGE_DISCOUNT)
     name=models.CharField(max_length=255)
     description=models.TextField(blank=True, null=True)
@@ -188,17 +270,48 @@ class Offer(models.Model):
     is_active = models.BooleanField(default=True)
     
     
-    def  is_valid(self):
-        now=timezone.now()
-        return self.is_active and self.start_date <= now <= self.end_date
+
+    def is_valid(self):
+        # Get the current local time (according to the time zone setting)
+        now = timezone.localtime(timezone.now())
+
+        # Convert the offer start and end dates to local time (if necessary)
+        start_date = timezone.localtime(self.start_date)
+        end_date = timezone.localtime(self.end_date)
+        
+        # print(f"Offer Start Date: {start_date}, End Date: {end_date}, Current Time: {now}")
+        
+        return self.is_active and start_date <= now <= end_date
+
+        
+
     
-    def apply_discount(self, price):
-        """Apply discount to a given price."""
-        if self.discount_type == self.PERCENTAGE_DISCOUNT:
-            return price * (1 - self.discount_values / 100)
-        elif self.discount_type == self.FIXED_DISCOUNT:
-            return price - self.discount_values
-        return price  
+    def apply_discount(self, product_price):
+        """Check if the discount is valid for the product's price, then apply the discount."""
+        # Check if the offer is valid
+        if not self.is_valid():
+            raise ValidationError("This offer is no longer valid.")
+        
+        # Handle the discount logic
+        if self.discount_type == self.FIXED_DISCOUNT:
+            if self.discount_values > product_price:
+                print(f"Fixed discount exceeds product price. Returning original price of {product_price}")
+                return product_price
+            discount_price = product_price - self.discount_values
+        
+        elif self.discount_type == self.PERCENTAGE_DISCOUNT:
+            if self.discount_values >= 100:
+                print(f"Percentage discount cannot be 100% or more. Returning original price of {product_price}")
+           
+                return product_price
+            discount_price = product_price * (1 - self.discount_values / 100)
+        
+        else:
+            discount_price = product_price
+
+        # Ensure the discount doesn't lead to a negative price
+        return max(discount_price, 0)
+    
     
     def __str__(self):
         return f"{self.name} ({self.get_offer_type_display()}, {self.get_discount_type_display()})"
@@ -225,32 +338,14 @@ class CartItem(models.Model):
     variant=models.ForeignKey(Variants,on_delete=models.CASCADE,related_name='varient_cart_items')
     quantity=models.PositiveIntegerField()
     
-    def get_discounted_price(self):
-        """Calculate the discounted price for this cart item."""
-        original_price = self.variant.price
-        
-        
-        product_offer=Offer.objects.filter(
-            offer_type=Offer.PRODUCT_OFFER,
-            product=self.variant.product,
-            is_active=True
-        ).first()
-        product_discounted_price = product_offer.apply_discount(original_price) if product_offer and product_offer.is_valid() else original_price
-        
-        category_offer=Offer.objects.filter(
-            offer_type=Offer.CATEGORY_OFFER,
-            category=self.variant.product.category,
-            is_active=True
-        ).first()
-        
-        category_discounted_price = category_offer.apply_discount(original_price) if category_offer and category_offer.is_valid() else original_price
-    
-        return min(product_discounted_price, category_discounted_price)   
-    
      
     @property
     def total_price(self):
-        return self.quantity * self.get_discounted_price()
+        return self.quantity * self.variant.get_discounted_price()
+    
+    @property
+    def total_official(self):
+        return self.quantity * self.variant.price
     
     def __str__(self):
         return f"{self.cart.user.username} - {self.variant.product.name} (Quantity: {self.quantity})"
@@ -262,7 +357,7 @@ class PaymentMethod(models.Model):
     def  __str__(self):
         return self.name        
    
-   
+from decimal import Decimal   
 class Coupon(models.Model):
     COUPON_TYPES = (
         ('PERCENTAGE', 'Percentage'),
@@ -280,18 +375,67 @@ class Coupon(models.Model):
     usage_limit = models.PositiveIntegerField(default=1)  # How many times coupon can be used
     used_count = models.PositiveIntegerField(default=0)  # Track how many times it has been used
     is_active = models.BooleanField(default=True)  # If the coupon is still active
+    
+   
   
     def __str__(self):
         return self.code
 
-    def is_valid(self):
-        # Check if coupon is active and within date range
-        return self.is_active and self.start_date <= timezone.now() <= self.end_date
+    
+    def is_valid(self, total_amount):
+        """Check if the coupon is valid based on the total amount."""
+        if not self.is_active:
+            print(f"Coupon {self.code} is inactive.")
+            return False, "Coupon is inactive."
+        
+        if self.start_date > timezone.now():
+            print(f"Coupon {self.code} hasn't started yet.")
+            return False, "Coupon has not started yet."
+        
+        if self.end_date < timezone.now():
+            print(f"Coupon {self.code} has expired.")
+            return False, "Coupon has expired."
+        
+        if self.used_count > self.usage_limit-1:
+            print(f"Coupon {self.code} usage limit reached. Used count: {self.used_count}")
+            return False, "Coupon usage limit exceeded."
+        
+        if self.minimum_purchase_amount > total_amount:
+            print(f"Coupon {self.code} requires a minimum purchase of {self.minimum_purchase_amount}, but total is {total_amount}.")
+            return False, "Coupon doesn't meet minimum purchase requirement."
+        
+        return True, ""
+
 
     def can_be_used(self):
         # Check if coupon has been used within the limit
-        return self.used_count < self.usage_limit   
+        return self.used_count < self.usage_limit 
+    
+    def calculate_discount(self, total_amount, shipping_cost=None):
+        """Calculate the discount amount based on the coupon type and value."""
+        discount = Decimal(0)
+        
+        if self.discount_type == 'PERCENTAGE':
+            discount = total_amount * (self.value / Decimal(100))
+        elif self.discount_type == 'FIXED':
+            discount = self.value
+        elif self.discount_type == 'FREE_SHIPPING' and shipping_cost:
+            discount = shipping_cost
+
+        # Apply maximum discount limit if defined
+        if self.maximum_discount:
+            discount = min(discount, self.maximum_discount)
+
+        return discount 
+    
+    def increment_usage(self):
+        """Increment the used count of the coupon."""
+        self.used_count = models.F('used_count') + 1
+        self.save(update_fields=['used_count'])
  
+
+
+from django.db import transaction
 
 class Order(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='order')
@@ -299,42 +443,35 @@ class Order(models.Model):
     paymentmethod=models.ForeignKey(PaymentMethod,on_delete=models.SET_NULL,null=True,default=1)  
     total_amount=models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
-    # coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    
-    def __str__(self):
-        return f"Order {self.id} - {self.user.username}"
-    
-    def apply_coupon(self):
-        """Calculate discount and apply coupon if valid."""
-        if self.coupon and self.coupon.is_valid():
-            # Check if order qualifies for coupon
-            if self.total_amount >= self.coupon.minimum_purchase_amount and self.coupon.can_be_used():
-                discount = 0
-                if self.coupon.discount_type == 'PERCENTAGE':
-                    discount = self.total_amount * (self.coupon.value / 100)
-                elif self.coupon.discount_type == 'FIXED':
-                    discount = self.coupon.value
-                elif self.coupon.discount_type == 'FREE_SHIPPING':
-                    discount = self.shipping_cost  # assuming shipping cost is defined elsewhere
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    is_paid = models.BooleanField(default=False)
+    discount_applied = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-                # Apply the maximum discount limit, if defined
-                if self.coupon.maximum_discount:
-                    discount = min(discount, self.coupon.maximum_discount)
-                
-                # Apply the discount but ensure total_amount doesn't go negative
-                self.total_amount -= min(discount, self.total_amount)
-                self.coupon.used_count += 1  # Increment used count
-                self.coupon.save()
-            else:
-                raise ValidationError("Coupon conditions are not met.")
-        else:
-            raise ValidationError("Coupon is not valid.")
+    
+
+
+
+
+    def apply_coupon(self):
+    
+       if self.coupon and not hasattr(self, '_coupon_applied'):
+            is_valid, message = self.coupon.is_valid(self.total_amount)
+            if not is_valid:
+                print(message)  # Log the invalid coupon message
+                return False, message 
+           
+            print(f"Applying coupon: {self.coupon.code}, Current Used Count: {self.coupon.used_count}")
+            self.coupon.used_count += 1
+            self.coupon.save()
+            print(f"Updated Used Count: {self.coupon.used_count}")
+            self._coupon_applied = True  # Flag to prevent multiple increments
 
     def save(self, *args, **kwargs):
-        self.apply_coupon()  # Apply coupon before saving
-        super().save(*args, **kwargs)
-    
+        with transaction.atomic():
+            self.apply_coupon()  # Apply the coupon if applicable
+            super().save(*args, **kwargs)
+ 
+ 
 class OrderItem(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE, related_name="order_items")
     variant = models.ForeignKey(Variants, on_delete=models.CASCADE)
@@ -343,10 +480,13 @@ class OrderItem(models.Model):
     product_name = models.CharField(max_length=255)
     status = models.CharField(max_length=50, choices=[
         ("Pending", "Pending"), 
+        ("Processing", "Processing"), 
         ("Delivered", "Delivered"),
         ("Cancelled", "Cancelled"),
         ("Returned", "Returned"),
         ("Refunded", "Refunded"),
+        ("Return Requested", "Return Requested"),
+        ("Return Rejected", "Return Rejected"),
         ("Failed", "Failed")
     ], default="Pending")
     
@@ -355,7 +495,7 @@ class OrderItem(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     
     def get_total_price(self):
-        return self.price * self.quantity
+        return self.quantity *  self.variant.get_discounted_price()
     
     def save(self, *args, update_stock=True, **kwargs):
         if update_stock:
@@ -397,4 +537,43 @@ class Wishlist(models.Model):
 
     class Meta:
         unique_together = ('user', 'varients') 
+        
+        
+        
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.username}'s Wallet"
+
+    def credit(self, amount):
+        """Add money to the wallet (credit)"""
+        self.balance += amount
+        self.save()
+
+    def debit(self, amount):
+        """Deduct money from the wallet (debit)"""
+        if self.balance >= amount:
+            self.balance -= amount
+            self.save()
+            return True
+        else:
+            return False
+        
+class Transaction(models.Model):
+    TRANSACTION_TYPE = (
+        ('credit', 'Credit'),
+        ('debit', 'Debit'),
+    )
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE) 
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"Transaction {self.id} by {self.user.username}"
         

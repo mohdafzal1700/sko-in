@@ -56,25 +56,47 @@
             <i class="fa-solid fa-bars" style="color: white; font-size: 1.6em; cursor: pointer;" 
                data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"></i>
         </div>
+        
 
         <!-- Centered Heading -->
         <h1 class="fs-2 fw ms-5" style="letter-spacing: .6em; color: white;">SKO.IN</h1>
 
+     
+          <!-- Search Icon with Input -->
+      
+          
+      
+
         <!-- Placeholder for right alignment, if needed -->
-        <div>
-          <a href="{% url 'Userprofile' %}" style="text-decoration: none;">
-            <i class="fa-solid fa-user me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-          <a href="{% url 'cart_view' %}" style="text-decoration: none;">
-            <i class="fa-solid fa-cart-shopping me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-          
-          <a href="{% url 'wishlist' %}" style="text-decoration: none;">
-            <i class="fa-regular fa-heart me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-          
+        <div class="d-flex align-items-center justify-content-end gap-3">
+          <!-- Search Form -->
+          <form action="{% url 'product_search' %}" method="get" class="d-flex align-items-center">
+            <input 
+              type="text" 
+              name="q" 
+              placeholder="Search Products..." 
+              class="form-control" 
+              style="width: 200px; margin-right: 10px; border-radius: 30px; border: none; padding-left: 10px; 
+                     font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; color: white; background-color: black;">
+            <button type="submit" style="background-color: transparent; border: none; cursor: pointer;">
+              <i class="fa-solid fa-search" style="color: white; font-size: 1.6em;"></i>
+            </button>
+          </form>
+        
+          <!-- Icons Section -->
+          <div class="d-flex align-items-center gap-4">
+            <a href="{% url 'Userprofile' %}" style="text-decoration: none;">
+              <i class="fa-solid fa-user" style="font-size: 1.4em; color: white;"></i>
+            </a>
+            <a href="{% url 'cart_view' %}" style="text-decoration: none;">
+              <i class="fa-solid fa-cart-shopping" style="font-size: 1.4em; color: white;"></i>
+            </a>
+            <a href="{% url 'wishlist' %}" style="text-decoration: none;">
+              <i class="fa-regular fa-heart" style="font-size: 1.4em; color: white;"></i>
+            </a>
+          </div>
         </div>
-    </nav>
+        </nav>
 
     
 

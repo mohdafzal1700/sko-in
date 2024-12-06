@@ -2,39 +2,10 @@
 
 {% block content %}
 <style>
-    .sidebar {
-        width: 250px;
-        padding: 20px;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .sidebar a {
-        display: block;
-        padding: 10px;
-        color: white;
-        text-decoration: none;
-        margin-bottom: 10px;
-        width: 100%;
-        text-align: center;
-        border-radius: 5px;
-    }
-
-    .sidebar a:hover {
-        color: white;
-        background-color: inherit;
-    }
-
-    .table-container {
-        padding: 15px;
-    }
-
     .table th, .table td {
-        padding: 12px;
-        text-align: center;
-        vertical-align: middle;
+        padding: 12px; /* Consistent padding for smooth alignment */
+        vertical-align: middle; /* Center content vertically */
+        text-align: center; /* Center align text in both header and body */
     }
 
     .table thead th {
@@ -43,7 +14,11 @@
     }
 
     .table tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0.1); /* Smooth hover effect */
+    }
+
+    .table-container {
+        padding: 15px;
     }
 
     .badge {
@@ -53,28 +28,56 @@
         font-weight: bold;
         color: white;
     }
-    
+
     .bg-active {
         background-color: #28a745;
     }
-    
+
     .bg-inactive {
         background-color: #dc3545;
+    }
+
+    /* Card styles for mobile view */
+    .card-container {
+        display: none; /* Hide cards by default */
+    }
+
+    .coupon-card {
+        background-color: #343a40;
+        color: white;
+        border: none;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .coupon-card h5 {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .coupon-card p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .coupon-card .actions {
+        margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .table-container {
+            display: none; /* Hide table on smaller screens */
+        }
+
+        .card-container {
+            display: block; /* Show cards on smaller screens */
+        }
     }
 </style>
 
 <div class="d-flex mt-3">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
-        <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
-        <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
-        <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
-        <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
-        <a href="{% url 'coupon_list' %}" data-section="coupon"><i class="fa fa-image"></i> Coupons</a>
-        <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
-    </div>
-
     <!-- Main Content -->
     <div class="main-content container mt-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -82,18 +85,17 @@
             <a href="{% url 'add_coupon' %}" class="btn btn-success">Add Coupon +</a>
         </div>
 
-        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+        <!-- Table View (Visible on Larger Screens) -->
+        <div class="table-container">
             <table class="table table-dark table-hover">
                 <thead>
                     <tr>
-                      
                         <th>Code</th>
                         <th>Discount Type</th>
                         <th>Value</th>
                         <th>Minimum Purchase</th>
                         <th>Start Date</th>
                         <th>End Date</th>
-                        
                         <th>Edit</th>
                         <th>Toggle Status</th>
                     </tr>
@@ -101,14 +103,12 @@
                 <tbody>
                     {% for coupon in coupons %}
                     <tr>
-                        
                         <td>{{ coupon.code }}</td>
                         <td>{{ coupon.discount_type }}</td>
-                        <td>{{ coupon.value }}{% if coupon.discount_type == 'percentage' %}%{% endif %}</td>
+                        <td>{{ coupon.value }}{% if coupon.discount_type == 'percentage' %} %{% endif %}</td>
                         <td>{{ coupon.minimum_purchase_amount }}</td>
                         <td>{{ coupon.start_date }}</td>
                         <td>{{ coupon.end_date }}</td>
-                        
                         <td>
                             <a href="{% url 'edit_coupon' coupon.id %}" class="btn btn-warning btn-sm">Edit</a>
                         </td>
@@ -120,15 +120,38 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="10" class="text-center">No coupons available.</td>
+                        <td colspan="8" class="text-center">No coupons available.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Card View (Visible on Mobile Screens) -->
+        <div class="card-container">
+            {% for coupon in coupons %}
+            <div class="coupon-card">
+                <h5>Coupon Code: {{ coupon.code }}</h5>
+                <p><strong>Discount Type:</strong> {{ coupon.discount_type }}</p>
+                <p><strong>Value:</strong> {{ coupon.value }}{% if coupon.discount_type == 'percentage' %} %{% endif %}</p>
+                <p><strong>Minimum Purchase:</strong> {{ coupon.minimum_purchase_amount }}</p>
+                <p><strong>Start Date:</strong> {{ coupon.start_date }}</p>
+                <p><strong>End Date:</strong> {{ coupon.end_date }}</p>
+                <div class="actions">
+                    <a href="{% url 'edit_coupon' coupon.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'toggle_coupon_status' coupon.id %}" class="btn btn-primary btn-sm">
+                        {% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="coupon-card text-center">
+                <p>No coupons available.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
-
 {% endblock %}
 
 <!-- Include Bootstrap CSS and JS for modals if needed -->

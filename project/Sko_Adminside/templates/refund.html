@@ -1,0 +1,145 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+    .table th, .table td {
+        padding: 12px; /* Consistent padding for smooth alignment */
+        vertical-align: middle; /* Center content vertically */
+        text-align: center; /* Center align text in both header and body */
+    }
+    
+    .table thead th {
+        background-color: #343a40;
+        color: #ffffff;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.1); /* Smooth hover effect */
+    }
+    
+    .table-container {
+        padding: 15px;
+    }
+    
+    /* Card styles for mobile view */
+    .card-container {
+        display: none; /* Hide cards by default */
+    }
+    
+    .card {
+        background-color: #343a40;
+        color: #ffffff;
+        border: none;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card h5 {
+        font-size: 18px;
+    }
+    
+    .card-actions button {
+        margin-right: 5px;
+    }
+    
+    @media (max-width: 768px) {
+        .table-container {
+            display: none; /* Hide table on smaller screens */
+        }
+        .card-container {
+            display: block; /* Show cards on smaller screens */
+        }
+    }
+</style>
+
+<div class="d-flex mt-3">
+    <!-- Sidebar -->
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Product Management Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="#" class="btn btn-dark">Return Request</a>
+        </div>
+
+        {% comment %} <form method="GET" action="{% url 'searchproduct' %}" class="d-flex mb-3">
+            <input type="text" name="search" class="form-control" placeholder="Search Products..." value="{{ request.GET.search }}">
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+        </form> {% endcomment %}
+
+        <!-- Product Table (Desktop View) -->
+        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th class="product-header ps-5">Product</th>
+                        <th class="category-header">Order ID</th>
+                        <th class="description-header">User</th>
+                        <th class="category-header">Request Type</th>
+                        <th class="edit-header">Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order_item in requests %}
+                    <tr>
+                        <td>{{ order_item.order.id }}</td>
+                        <td>{{ order_item.order.user.username }}</td>
+                        <td>{{ order_item.status }}</td>
+                        <td>{{ order_item.status }}</td>
+                        <td>{{ order_item.return_reason }}</td>
+                        <td>
+                            {% if order_item.status == "Return Requested" %}
+                            <form method="POST" action="{% url 'process_return_request' order_item.id 'accept' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">Accept</button>
+                            </form>
+                            <form method="POST" action="{% url 'process_return_request' order_item.id 'reject' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Reject</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card View (Mobile View) -->
+        <div class="card-container">
+            {% for order_item in requests %}
+            <div class="card">
+                <h5>Product ID: {{ order_item.order.id }}</h5>
+                <p><strong>Order ID:</strong> {{ order_item.order.id }}</p>
+                <p><strong>User:</strong> {{ order_item.order.user.username }}</p>
+                <p><strong>Request Type:</strong> {{ order_item.status }}</p>
+                <p><strong>Reason:</strong> {{ order_item.return_reason }}</p>
+                <div class="card-actions">
+                    {% if order_item.status == "Return Requested" %}
+                    <form method="POST" action="{% url 'process_return_request' order_item.id 'accept' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                    </form>
+                    <form method="POST" action="{% url 'process_return_request' order_item.id 'reject' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="card text-center">
+                <p>No requests found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

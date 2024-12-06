@@ -155,7 +155,8 @@
                       {{ product.min_price|floatformat:2 }}
                   {% endif %}
               </p>
-              {% comment %} <form action="{% url 'add_to_wishlist' %}" method="post" class="add-to-wishlist-form" id="wishlistForm">
+             
+             <form action="{% url 'add_to_wishlist' %}" method="post" class="add-to-wishlist-form" id="wishlistForm">
                 {% csrf_token %}
                 <input type="hidden" name="variant_id" value="{{ product.variants.first.id }}">
                 
@@ -171,7 +172,7 @@
                     </button>
                 {% endif %}
             </form>
-               {% endcomment %}
+              
               
               </div>
              

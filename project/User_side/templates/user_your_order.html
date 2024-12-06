@@ -56,8 +56,8 @@
   .order-card {
     background-color: #2c2c2e;
     margin-bottom: 20px;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 10px;
+   
   }
 
   .order-header {
@@ -65,7 +65,7 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #444;
-    padding-bottom: 10px;
+  
     margin-bottom: 15px;
   }
 
@@ -169,35 +169,162 @@
 .modal-body p, .modal-body h6 {
   margin-left: 0 !important; /* Ensure no extra margin is applied */
 }
+/* General Styles for the Cancel Section */
+.order-cancel-section {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  background-color: #f8d7da; /* Light red background for warnings */
+}
+/* Container for the cancel section */
+.order-cancel-section {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #ececec;
+  border-radius: 5px;
+  background-color: #fafafa;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Cancel Button */
+/* Main Container */
+.order-cancel-section {
+  margin: 10px 0;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  font-size: 14px;
+  padding: 6px 12px;
+  color: white;
+  background-color: #ff9800;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #e68900;
+}
+
+/* Popup Background */
+.cancel-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Popup Content */
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Textarea */
+.cancel-reason-textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: none;
+}
+
+/* Button Group */
+.button-group {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #b02a37;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #565e64;
+}
+.fixed-size-btn {
+  min-width: 120px;
+  text-align: center;
+  margin: 5px;
+}
+
 
 </style>
 
 <div class="container-fluid min-vh-100 p-4 d-flex gap-4">
   <!-- Sidebar -->
-  <div class="d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 16rem;">
+  <div class=" side d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 18rem;">
     <h5 class="fw-semibold mb-2">Manage My Account</h5>
     <a href="{% url 'Userprofile' %}" class="text-decoration-none dull-hover">
-      <p class="text-danger ms-3 mb-3 mt-4">My Profile</p>
+        <p class="text-danger ms-3 mb-3 mt-4 fs-5">My Profile</p>
     </a>
-
+    
     <a href="{% url 'address' %}" class="text-decoration-none dull-hover">
-      <p class="text-danger ms-3 mb-3 mt-4">My Address</p>
-    </a>
-
+      <p class="text-danger ms-3 mb-3 mt-4 fs-6">My Address</p>
+  </a>
     <div>
       <h5 class="fw-semibold mb-2" data-bs-toggle="collapse" data-bs-target="#orderList" aria-expanded="false" aria-controls="orderList">
         My Orders
       </h5>
       <div class="collapse" id="orderList">
-        <ul class="ms-3 mb-4 list-unstyled">
+        <ul class="ms-3 mb-4 list-unstyled" >
           <li><a href="{% url 'userorders' %}?status=all" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">All Orders</p></a></li>
-          <li><a href="{% url 'userorders' %}?status=cancelled" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Cancelled Item</p></a></li>
           <li><a href="{% url 'userorders' %}?status=returned" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Return Item</p></a></li>
+          <li><a href="{% url 'userorders' %}?status=Pending" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Order History</p></a></li>
           <li><a href="{% url 'userorders' %}?status=processing" style="text-decoration: none;"><p class="text-danger ms-3 mb-1 mt-2">Processing Item</p></a></li>
         </ul>
+      
       </div>
 
-      <h5 class="fw-semibold">My Wallet</h5>
+      <h5 class="fw-semibold">
+        <a href="{% url 'wallet' %}" class="text-decoration-none text-light">My Wallet</a>
+      </h5>
       <button type="button" class="btn btn-danger w-100 mt-4">
         <i class="bi bi-box-arrow-right me-2"></i> Logout
       </button>
@@ -207,7 +334,7 @@
   <!-- Main Content -->
   <div class="flex-fill card bg-zinc-800 text-white p-4">
     <h1 class="display-6 mb-4 text-center">My Orders</h1>
-
+  
     <div class="container my-5">
       <div class="w-100 mx-auto p-4 bg-dark rounded-4 shadow-lg">
         <div class="card bg-secondary text-white mb-4">
@@ -217,57 +344,99 @@
           </div>
           <div id="orders-list" class="list-group list-group-flush">
             {% for order_item in orders %}
-              <div class="order-card">
-                <div class="order-header">
-                  <div><strong>Order #{{ order_item.id }}</strong></div>
-                  <div class="text-end">{{ order_item.order.added_date|date:"d/m/Y" }}</div>
-                </div>
-                <div class="order-item">
-                  {% with image=order_item.variant.images.first %}
-                    {% if image %}
-                      <img src="{{ image.image.url }}" alt="{{ order_item.product_name }}">
-                    {% else %}
-                      <img src="path/to/default/image.jpg" alt="Default Image">
-                    {% endif %}
-                  {% endwith %}
+              <!-- Updated Order Card Design -->
+              <div class="p-3 order-card bg-dark text-white mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between mb-3">
                   <div>
-                    <h4 class="mb-1">{{ order_item.product_name }}</h4>
-                    <div>Quantity: {{ order_item.quantity }}</div>
-                    <div class="order-status {% if order_item.status == 'Pending' %}pending{% elif order_item.status == 'Processing' %}processing{% elif order_item.status == 'Shipped' %}shipped{% elif order_item.status == 'Delivered' %}delivered{% endif %}">
-                      {{ order_item.status }}
+                    <p class="text-small ms-0">
+                        <span class="fw-bold d-inline-block" style="width: 100px;">Order ID:</span>
+                        <span class="font-monospace">{{ order_item.id }}</span>
+                    </p>
+                    <p class="text-small ms-0">
+                        <span class="fw-bold d-inline-block" style="width: 100px;">Order Date:</span>
+                        <span class="font-monospace">{{ order_item.order.added_date|date:"d/m/Y" }}</span>
+                    </p>
+                </div>
+                 <div class="text-start text-md-end mt-2 mt-md-0">
+                    <p class="fw-bold fs-5 mb-1">₹{{ order_item.get_total_price }}</p>
+                    <p class="text-muted small">Payment: {{ order_item.order.payment_method }}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <!-- Order Item -->
+                  <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between border-top pt-3">
+                    <div class="d-flex align-items-center">
+                      {% with image=order_item.variant.images.first %}
+                        {% if image %}
+                          <img src="{{ image.image.url }}" alt="{{ order_item.product_name }}" 
+                               class="rounded bg-light me-3" style="width: 80px; height: 80px;">
+                        {% else %}
+                          <img src="path/to/default/image.jpg" alt="Default Image" 
+                               class="rounded bg-light me-3" style="width: 80px; height: 80px;">
+                        {% endif %}
+                      {% endwith %}
+                      <div>
+                        <h5 class="mb-0">{{ order_item.product_name }}</h5>
+                        <p class="text-muted small mb-0">Qty: {{ order_item.quantity }}</p>
+                      </div>
+                    </div>
+                    <div class="text-start text-md-end mt-2 mt-md-0">
+                      <p class="fw-medium mb-1 me-4 ">Quantity: {{ order_item.quantity }}</p>
+                      <span class="badge {% if order_item.status == 'Pending' %}badge-warning{% elif order_item.status == 'Processing' %}badge-processing{% else %}badge-info{% endif %}">
+                        Status: {{ order_item.status }}
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                <div class="text-end">
-                  <div class="order-price">₹{{ order_item.get_total_price }}</div>
-                </div>
-
-                <div class="action-buttons">
-                  <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#orderModal{{ order_item.order.id }}">View</button>
-
+  
+                <div class="text-end mt-4">
+                  <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#orderModal{{ order_item.order.id }}">View Details</button>
+  
                   {% if order_item.status == "Pending" %}
-                    <a href="javascript:void(0);" onclick="showCancelReasonForm({{ order_item.id }})" class="cancel-btn">Cancel</a>
-                    <div id="cancel-reason-form-{{ order_item.id }}" style="display: none; margin-top: 10px;">
+                  <!-- Cancel Order Button -->
+                  <a href="javascript:void(0);" onclick="showCancelPopup({{ order_item.id }})" class="btn btn-danger">Cancel Order</a>
+                  <div id="cancel-popup-{{ order_item.id }}" class="cancel-popup" style="display: none;">
+                    <div class="popup-content">
+                      <span class="close-btn" onclick="hideCancelPopup({{ order_item.id }})">&times;</span>
                       <form action="{% url 'cancelorder' order_item.id %}" method="post">
                         {% csrf_token %}
-                        <label for="cancel_reason_{{ order_item.id }}">Cancel Reason:</label>
-                        <textarea name="cancel_reason" id="cancel_reason_{{ order_item.id }}" class="form-control" required></textarea>
-                        <button type="submit" class="btn btn-danger btn-sm mt-2">Submit Cancellation</button>
+                        <h4>Reason for Cancellation</h4>
+                        <textarea name="cancel_reason" class="cancel-reason-textarea" placeholder="Enter your reason..." required></textarea>
+                        <div class="button-group">
+                          <button type="submit" class="btn btn-danger">Submit</button>
+                          <button type="button" class="btn btn-secondary" onclick="hideCancelPopup({{ order_item.id }})">Close</button>
+                        </div>
                       </form>
                     </div>
+                  </div>
+                  
                   {% elif order_item.status == "Delivered" %}
-                    <a href="javascript:void(0);" onclick="showReturnReasonForm({{ order_item.id }})" class="return-btn">Return</a>
-                    <div id="return-reason-form-{{ order_item.id }}" style="display: none; margin-top: 10px;">
+                  <!-- Return Order Button -->
+                  <a href="javascript:void(0);" onclick="showReturnPopup({{ order_item.id }})" class="btn btn-warning fixed-size-btn">Return</a>
+                  <div id="return-popup-{{ order_item.id }}" class="return-popup" style="display: none;">
+                    <div class="popup-content">
+                      <span class="close-btn" onclick="hideReturnPopup({{ order_item.id }})">&times;</span>
                       <form action="{% url 'returnorder' order_item.id %}" method="post">
                         {% csrf_token %}
-                        <label for="return_reason_{{ order_item.id }}">Return Reason:</label>
-                        <textarea name="return_reason" id="return_reason_{{ order_item.id }}" class="form-control" required></textarea>
-                        <button type="submit" class="btn btn-outline-light btn-sm mt-2">Submit Return</button>
+                        <h4>Reason for Return</h4>
+                        <textarea name="return_reason" id="return_reason_{{ order_item.id }}" 
+                                  class="form-control" 
+                                  placeholder="Enter your reason for return..." 
+                                  required></textarea>
+                        <div class="button-group mt-3">
+                          <button type="submit" class="btn btn-danger">Submit</button>
+                          <button type="button" class="btn btn-secondary" onclick="hideReturnPopup({{ order_item.id }})">Close</button>
+                        </div>
                       </form>
                     </div>
+                  </div>
+                  {% elif order_item.status == "Processing" and not order_item.is_paid %}
+<!-- Make Payment Button -->
+<a href="{% url 'payment_confirmation' %}?order_id={{ order_item.id }}" class="btn btn-success">Make Payment</a>
+                  
                   {% endif %}
-                </div>
+                                  </div>
               </div>
             {% endfor %}
           </div>
@@ -276,7 +445,8 @@
     </div>
   </div>
 </div>
-{% for order_item in orders %}
+
+  {% for order_item in orders %}
 <!-- Order Details Modal -->
 <div class="modal fade text-light" id="orderModal{{ order_item.order.id }}" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -304,9 +474,10 @@
                         <p>{{ order_item.order.shipping_address.country }}</p>
                         <p>{{ order_item.order.shipping_address.postal_code }}</p>
                     </div>
-                    <p><strong>Payment Date:</strong> {{ order_item.order.payment_date|date:"d/m/Y" }}</p>
+                   
                     <p><strong>Payment Method:</strong> {{ order_item.order.paymentmethod.name }}</p>
                     <p><strong>Total Amount:</strong> ₹{{ order_item.order.total_amount }}</p>
+                    <p><strong>Payment Success:</strong> {{ order_item.order.is_paid }}</p>
                     <p><strong>Order Status:</strong> 
                         <span class="badge bg-{{ order_item.status|lower }}">{{ order_item.status }}</span>
                     </p>
@@ -338,14 +509,78 @@
                 </div>
             </div>
             <div class="modal-footer border-top-0">
+              <form action="{% url 'download_invoice' order_item.order.id %}" method="get" class="mb-0">
+                <button type="submit" class="btn btn-primary">Download Invoice</button>
+            </form>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
+</div>
 {% endfor %}
+</div>
+<style>
+  /* General Popup Styling */
+  .return-popup, .cancel-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      display: none;
+    
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      
+  }
+  
+  /* Popup Content */
+  .popup-content {
+      position: relative;
+      padding: 20px;
+  }
+  
+  /* Close Button */
+  .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #333;
+  }
+  
+  /* Buttons */
+  .button-group button {
+      margin-right: 10px;
+  }
+  
+  textarea {
+      width: 100%;
+      height: 80px;
+      resize: none;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+  }
+  </style>
+  
 
-
+<script>
+  function showReturnPopup(orderId) {
+      const popup = document.getElementById(`return-popup-${orderId}`);
+      popup.style.display = "block";
+  }
+  
+  function hideReturnPopup(orderId) {
+      const popup = document.getElementById(`return-popup-${orderId}`);
+      popup.style.display = "none";
+  }
+  </script>
+  
 
 <script>
   // Toggle visibility of cancel reason form
@@ -359,6 +594,18 @@
     const form = document.getElementById(`return-reason-form-${orderItemId}`);
     form.style.display = form.style.display === "none" ? "block" : "none";
   }
+</script>
+<script>
+  function showCancelPopup(orderId) {
+    // Show the popup
+    document.getElementById(`cancel-popup-${orderId}`).style.display = 'flex';
+}
+
+function hideCancelPopup(orderId) {
+    // Hide the popup
+    document.getElementById(`cancel-popup-${orderId}`).style.display = 'none';
+}
+
 </script>
 
 {% endblock %}

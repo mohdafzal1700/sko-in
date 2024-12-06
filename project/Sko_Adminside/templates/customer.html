@@ -2,10 +2,11 @@
 
 {% block content %}
 <style>
+/* Table Styles */
 .table th, .table td {
-    padding: 12px; /* Consistent padding for smooth alignment */
-    vertical-align: middle; /* Center content vertically */
-    text-align: center; /* Center align text in both header and body */
+    padding: 12px;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .table thead th {
@@ -14,87 +15,157 @@
 }
 
 .table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.1); /* Smooth hover effect */
+    background-color: rgba(0, 0, 0, 0.1);
 }
-.table-container {
+
+/* Card Styles for Mobile View */
+.responsive-card {
+    display: none; /* Hidden by default (visible only on smaller screens) */
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
     padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+.responsive-card h5 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.responsive-card .card-detail {
+    margin-bottom: 5px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.responsive-card .card-detail span {
+    font-weight: bold;
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+    .table-container .table {
+        display: none; /* Hide the table on smaller screens */
+    }
+
+    .responsive-card {
+        display: block; /* Show cards on smaller screens */
+    }
+}
+.pagination .page-item .page-link {
+    border-radius: 8px; /* Rounded corners */
+    margin: 0 2px; /* Small spacing between buttons */
+    background-color: #343a40; /* Dark background */
+    color: #fff; /* White text */
+    border: 1px solid #343a40; /* Border same as background */
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff; /* Active button background (blue) */
+    border-color: #007bff; /* Match the active button border */
+    color: #fff; /* White text */
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #495057; /* Slightly lighter on hover */
+    color: #fff; /* Keep text white */
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #6c757d; /* Gray for disabled state */
+    color: #ccc; /* Light gray text */
+    border: 1px solid #6c757d;
+}
+
+
 </style>
 
-
-
-
-
 <div>
-    <div class="d-flex mt-3">
-        <div class="sidebar">
-            <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
-            <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
-            <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
-            <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
-            <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
-            <a href="{% url 'offer' %}" data-section="banner"><i class="fa fa-image"></i> Offers</a>
-            <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
-        </div>
-        <div class="main-content">
-            <!-- Product Management and Table -->
+    <div class="d-flex flex-column flex-lg-row mt-3 align-items-center">
+        <!-- Product Management and Search Section -->
+        <div class="main-content w-100">
             <div class="product-management-section mb-4">
-                <div class="d-flex align-items-center mb-2 sticky-button-section">  <!-- Use flexbox for alignment -->
-                    <button class="btn btn-dark me-2">CUSTOMERS</button>  <!-- Add margin for spacing -->
-                    <form method="POST" action="{% url 'searchcustomer' %}" class="ms-2" id="searchForm">
+                <div class="d-flex flex-column flex-sm-row align-items-center mb-2 sticky-button-section">
+                   <h2>Customers</h2>
+                    <form method="POST" action="{% url 'searchcustomer' %}" id="searchForm" class="d-flex w-100 w-sm-auto">
                         {% csrf_token %}
-                        <input type="text" name="search" id="searchInput" class="form-control d-inline-block w-auto search-bar" value="{{ search }}" placeholder="Search" />
+                        <input type="text" name="search" id="searchInput" class="form-control me-4  ms-3 search-bar" value="{{ search }}" placeholder="Search">
                     </form>
                 </div>
             </div>
-                <!-- Table Header Section -->
-                <div class="table-header">
-                    <table class="table table-dark table-hover">
-                        <thead>
-                            <tr>
-                                <th class="price-header me-1">Name</th>
-                                <th class="stock-header">Email</th>
-                                <th class="category-header">Joindate</th>
-                                <th class="edit-header">Edit</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
 
-                <!-- Table Body Section -->
-                <div class="table-container mt-3" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-dark table-hover">
-                        <tbody>
-                            {% for user in data %}
-                            <tr class="custom-row">
-                                <td class="product-body">
-                                    {{ user.username }}
-                                </td>
-                                <td class="price-body">{{ user.email }}</td>
-                                <td class="price-body">{{ user.date_joined }}</td>
-                                <!-- User Action Row -->
-                                <td class="edit-or-delete-body">
-                                    {% if user.is_superuser %}
-                                    Superuser
-                                    {% else %}
-                                    <button class="btn {% if not user.is_active %}btn-unblock{% else %}btn-block{% endif %}"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmationModal"
-                                        data-user-id="{{ user.id }}"
-                                        data-user-action="{% if not user.is_active %}unblock{% else %}block{% endif %}">
-                                        {% if not user.is_active %}
-                                        Unblock
-                                        {% else %}
-                                        Block
-                                        {% endif %}
-                                    </button>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- Table Section (Visible on Larger Screens) -->
+            <div class="table-container table-responsive">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Join Date</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in data %}
+                        <tr class="custom-row">
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.date_joined }}</td>
+                            <td>
+                                {% if user.is_superuser %}
+                                Superuser
+                                {% else %}
+                                <button class="btn 
+                                    {% if not user.is_active %}btn-success{% else %}btn-danger{% endif %}" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#confirmationModal" 
+                                    data-user-id="{{ user.id }}" 
+                                    data-user-action="{% if not user.is_active %}unblock{% else %}block{% endif %}">
+                                    {% if not user.is_active %} Unblock {% else %} Block {% endif %}
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Card Layout Section (Visible on Smaller Screens) -->
+            <div class="card-container">
+                {% for user in data %}
+                <div class="responsive-card">
+                    <h5>{{ user.username }}</h5>
+                    <div class="card-detail">
+                        <span class="fw-bold text-dark">Email:</span> 
+                        <span class="fw-bold text-dark">{{ user.email }}</span>
+                    </div>
+                    
+                    <!-- Join Date -->
+                    <div class="card-detail">
+                        <span class="fw-bold text-dark">Join Date:</span> 
+                        <span class="fw-bold text-dark">{{ user.date_joined|date:"d M, Y" }}</span>
+                    </div>
+                    <div class="text-center mt-3">
+                        {% if user.is_superuser %}
+                        <span class="badge bg-secondary">Superuser</span>
+                        {% else %}
+                        <button class="btn 
+                            {% if not user.is_active %}btn-success{% else %}btn-danger{% endif %}" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#confirmationModal" 
+                            data-user-id="{{ user.id }}" 
+                            data-user-action="{% if not user.is_active %}unblock{% else %}block{% endif %}">
+                            {% if not user.is_active %} Unblock {% else %} Block {% endif %}
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -117,7 +188,62 @@
             </div>
         </div>
     </div>
+</div><div class="pagination-container d-flex justify-content-center mt-4">
+    <ul class="pagination">
+        <!-- First Link -->
+        {% if data.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="First">First</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">First</span>
+            </li>
+        {% endif %}
+
+        <!-- Previous Link -->
+        {% if data.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.previous_page_number }}" aria-label="Previous">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        {% endif %}
+
+        <!-- Current Page -->
+        <li class="page-item active">
+            <span class="page-link">{{ data.number }}</span>
+        </li>
+
+        <!-- Next Link -->
+        {% if data.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.next_page_number }}" aria-label="Next">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        {% endif %}
+
+        <!-- Last Link -->
+        {% if data.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ data.paginator.num_pages }}" aria-label="Last">Last &raquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Last</span>
+            </li>
+        {% endif %}
+    </ul>
 </div>
+
+
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -128,32 +254,25 @@
         const userActionSpan = document.getElementById('userAction');
         const confirmActionText = document.getElementById('confirmActionText');
 
-        // Listen for when the modal is triggered to be shown
         confirmationModal.addEventListener('show.bs.modal', (event) => {
             const button = event.relatedTarget;
             const userId = button?.getAttribute('data-user-id');
             const userAction = button?.getAttribute('data-user-action');
-
-            if (!userId || !userAction) {
-                console.error('User ID or action is missing.');
-                return;
-            }
 
             userActionSpan.textContent = userAction;
             confirmActionText.textContent = userAction;
             confirmActionBtn.href = `/toggle_block_user/${userId}/`;
         });
 
-        // Automatic reload every 5 seconds (5000 milliseconds)
         setInterval(() => {
             location.reload();
-        }, 5000);
+        }, 100000);
     });
+
     document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const searchForm = document.getElementById("searchForm");
 
-        // Function to debounce input events
         function debounce(func, delay) {
             let timeout;
             return function(...args) {
@@ -162,16 +281,12 @@
             };
         }
 
-        // Input event listener for submitting the form on input
         searchInput.addEventListener("input", debounce(function() {
             const inputValue = searchInput.value.trim();
-
-            // Automatically submit the form if there is input
             if (inputValue.length > 0) {
                 searchForm.submit();
             }
-        }, 300)); // Debounce for 300ms
+        }, 300));
     });
 </script>
-
 {% endblock %}

@@ -63,10 +63,10 @@ INSTALLED_APPS = [
 SOCIALACCOUNT_PROVIDERS = {
      'google': {
         'APP': {
-            # 'client_id': '893024725251-slj6gt01ug1csbesjigp5teo1a9k81vj.apps.googleusercontent.com',
-            # 'secret': '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',
+            'client_id': '893024725251-slj6gt01ug1csbesjigp5teo1a9k81vj.apps.googleusercontent.com',
+            'secret': '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',
             'key': ''
-        },
+        },  
         'SCOPE': [
             'profile',
             'email',
@@ -151,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -201,8 +201,9 @@ LOGOUT_REDIRECT_URL="/"
 # Use the custom social account adapter
 SOCIALACCOUNT_ADAPTER = 'User_side.adapters.CustomSocialAccountAdapter'
 
-
-
+# Razorpay API keys (not secure for production)
+RAZOR_API_KEY = "rzp_test_KDYrLJHnu3O9Ip" 
+RAZOR_SECRET_ID  = "bcOjtnHN19lrbqBWdS35Ee7J"
 
 
 # Admin side session configuration

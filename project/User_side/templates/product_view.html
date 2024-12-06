@@ -166,36 +166,55 @@
                 </div>
             </div>
 
-            <!-- Product Details Section -->
             <div class="col-lg-6">
                 <p class="text small text-start">SKO.IN</p>
                 <h1 class="display-5 fw-bold text-start">{{ product.name }}</h1>
-                <div class="d-flex align-items-baseline gap-2 my-3 text-start">
-                    <span class="fs-3 fw-bold" id="variantPrice">Rs. {{ product.variants.first.price }}</span>
-                     <span class="fs-4  text ms-3" id="variantStock">Stock: {{ product.variants.first.stock }}</span>
-                    
-                     
-                </div>
                
-                
+                <div class="d-flex align-items-baseline gap-2 my-3 text-start">
+                    <!-- Check if a discount exists -->
+                    {% if product.variants.first.get_discounted_price != product.variants.first.price %}
+                    <!-- Discounted price -->
+                    <span class="fs-5 text" style="text-decoration: line-through;">
+                        Rs. <span id="strikethroughPrice">{{ product.variants.first.price|floatformat:2 }}</span>
+                    </span>
+                    <span class="fs-3 fw-bold text" id="variantPrice">
+                        Rs. <span id="discountedPriceValue">{{ product.variants.first.get_discounted_price|floatformat:2 }}</span>
+                    </span>
+                    {% else %}
+                    <!-- No discount -->
+                    <span class="fs-3 fw-bold text" id="variantPrice">
+                        Rs. <span id="discountedPriceValue">{{ product.variants.first.price|floatformat:2 }}</span>
+                    </span>
+                    {% endif %}
+                    <span id="variantStock" class="fs-5">
+                        Stock: {{ product.variants.first.stock }}
+                    </span>
+                </div>
+                <span id="variantPrice"></span>
+<span id="strikethroughPrice"></span>
+<span id="discountedPriceValue"></span>
+<span id="variantStock"></span>
+
+
                 <form action="{% url 'add_to_cart' %}" method="post">
                     {% csrf_token %}
-                    <!-- Set the default variant ID from `default_variant` in the hidden input field -->
-                    <input type="hidden" name="variant_id" id="hidden_variant_id" value="{{ default_variant.id }}">
-                
-                    <div class="mb-2" style="width: 8em;">
-                        <label class="form-label">Size & Color</label>
-                        <select class="form-select" id="variantSelect" aria-label="Select size" onchange="updateVariantSelection()">
-                            {% for variant in variants %}
-                                <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-stock="{{ variant.stock }}"
-                                    {% if variant.id == default_variant.id %}selected{% endif %}>
-                                       {{ variant.size }} - {{ variant.color }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                
-                    <div class="mb-3" style="width: 6em;">
+                    <input type="hidden" name="variant_id" id="hidden_variant_id" value="{{ product.variants.first.id }}">
+                    
+                    <!-- Your Select Element (without inline onchange) -->
+<div class="mb-2" style="width: 8em;">
+    <label class="form-label">Size & Color</label>
+    <select class="form-select" id="variantSelect">
+        {% for variant in product.variants.all %}
+            <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-discounted-price="{{ variant.get_discounted_price }}" data-stock="{{ variant.stock }}" 
+                {% if variant.id == product.variants.first.id %}selected{% endif %}>
+                {{ variant.size }} - {{ variant.color }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+               
+                            <div class="mb-3" style="width: 6em;">
                         <label class="form-label">Quantity</label>
                         <div class="input-group">
                             <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(-1)">-</button>
@@ -267,7 +286,7 @@
             const selectedOption = variantSelect.options[variantSelect.selectedIndex];
             
             const price = selectedOption.getAttribute('data-price');
-            document.getElementById('variantPrice').textContent = `Rs. ${price}`;
+            document.getElementById('variantPrice').textContent = ` ${price}`;
 
             const stock = parseInt(selectedOption.getAttribute('data-stock'));
             const stockText = stock < 20 ? 'Limited Stock' : `Stock: ${stock}`;
@@ -301,43 +320,80 @@
             });
         };
     </script>
-
+    
     <script>
-        function updateVariantSelection() {
-            const variantSelect = document.getElementById("variantSelect");
-            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
-            
-            // Update hidden input field with selected variant ID
-            document.getElementById("hidden_variant_id").value = selectedOption.value;
+        document.addEventListener("DOMContentLoaded", function() {
+            // Define the updateVariantSelection function
+            function updateVariantSelection() {
+                // Ensure elements are present in the DOM before accessing them
+                const variantPriceElement = document.getElementById("variantPrice");
+                const strikethroughPriceElement = document.getElementById("strikethroughPrice");
+                const discountedPriceValueElement = document.getElementById("discountedPriceValue");
+                const variantStockElement = document.getElementById("variantStock");
     
-            // Update the price and stock display based on selected variant
-            const price = selectedOption.getAttribute("data-price");
-            const stock = selectedOption.getAttribute("data-stock");
-            document.getElementById("variantPrice").innerText = `Rs. ${price}`;
-            document.getElementById("variantStock").innerText = `Stock: ${stock}`;
-            
-
-             // Update stock display based on stock value
-            const variantStockElement = document.getElementById("variantStock");
-            if (stock === 0) {
-                variantStockElement.innerText = "No stock";
-                variantStockElement.style.color = "red";
-            } else if (stock <= 10) {
-                variantStockElement.innerText = "Limited stock available";
-                variantStockElement.style.color = "orange";
-            } else {
-                variantStockElement.innerText = `Stock: ${stock}`;
-                variantStockElement.style.color = "white"; // Reset to default color
+                // If any of the elements are missing, exit the function
+                if (!variantPriceElement || !strikethroughPriceElement || !discountedPriceValueElement || !variantStockElement) {
+                    console.error("One or more required elements are missing in the DOM.");
+                    return;  // Exit the function if necessary elements aren't available
+                }
+    
+                const variantSelect = document.getElementById("variantSelect");
+                const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+    
+                // Update hidden input field with selected variant ID
+                document.getElementById("hidden_variant_id").value = selectedOption.value;
+        
+                // Get the price, discounted price, and stock for the selected variant
+                const price = selectedOption.getAttribute("data-price");
+                const discountedPrice = selectedOption.getAttribute("data-discounted-price");
+                const stock = parseInt(selectedOption.getAttribute("data-stock"), 10);  // Ensure stock is a number
+    
+                // Update the price display based on whether a discount exists
+                if (discountedPrice !== price) {
+                    // Show discounted price
+                    strikethroughPriceElement.textContent = ` ${price.toFixed(2)}`;
+                    discountedPriceValueElement.textContent = `  ${discountedPrice.toFixed(2)}`;
+                } else {
+                    // No discount
+                    strikethroughPriceElement.textContent = '';  // Clear the strikethrough price
+                    discountedPriceValueElement.textContent = `  ${price.toFixed(2)}`;
+                }
+    
+                // Update stock display based on the stock value
+                updateStock(stock);
             }
-    }
+    
+            // Function to update stock display
+            function updateStock(stock) {
+                const variantStockElement = document.getElementById("variantStock");
+    
+                if (stock === 0) {
+                    variantStockElement.innerText = "No stock";
+                    variantStockElement.style.color = "red";
+                } else if (stock <= 10) {
+                    variantStockElement.innerText = "Limited stock available";
+                    variantStockElement.style.color = "orange";
+                } else {
+                    variantStockElement.innerText = `Stock: ${stock}`;
+                    variantStockElement.style.color = "white"; // Reset to default color
+                }
+            }
+    
+            // Initialize variant selection on page load
+            const variantSelect = document.getElementById("variantSelect");
+            if (variantSelect) {
+                updateVariantSelection();  // Initial update when the page loads
+            }
+    
+            // Add event listener to the variant select dropdown
+            if (variantSelect) {
+                variantSelect.addEventListener("change", updateVariantSelection);  // Call function on selection change
+            } else {
+                console.error("Variant select element not found.");
+            }
+        });
     </script>
-
-<script>
-
-    
-</script>
-
-    
+        
     
 
 

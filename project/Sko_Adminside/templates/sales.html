@@ -1,0 +1,139 @@
+{% extends 'admin_base.html' %}
+
+{% block content %}
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.d-flex {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for responsiveness */
+}
+
+.card {
+    border: none;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: white;
+}
+
+.btn {
+    font-size: 16px;
+}
+</style>
+
+<div class="container-fluid px-3">
+    <h2 class="text-center mb-4">Sales Report</h2>
+
+    <!-- Filter Section -->
+    <form method="GET" action="" class="mb-3">
+        <div class="row g-3">
+            <div class="col-12 col-md-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-12 col-md-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Total Summary -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-3">Summary</h4>
+            <div class="row text-center">
+                <div class="col-12 col-md-4 mb-3 mb-md-0">
+                    <h5 class="text-muted">Total Sales</h5>
+                    <p class="fs-5 fw-bold">₹ {{ total_sales|floatformat:2 }}</p>
+                </div>
+                <div class="col-12 col-md-4 mb-3 mb-md-0">
+                    <h5 class="text-muted">Total Discounts</h5>
+                    <p class="fs-5 fw-bold">₹ {{ total_discounts|floatformat:2 }}</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <h5 class="text-muted">Total Orders</h5>
+                    <p class="fs-5 fw-bold">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-3">Breakdown</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Total Sales</th>
+                            <th>Total Discounts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Daily</td>
+                            <td>₹ {{ daily.sales|floatformat:2 }}</td>
+                            <td>₹ {{ daily.discounts|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Weekly</td>
+                            <td>₹ {{ weekly.sales|floatformat:2 }}</td>
+                            <td>₹ {{ weekly.discounts|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Monthly</td>
+                            <td>₹ {{ monthly.sales|floatformat:2 }}</td>
+                            <td>₹ {{ monthly.discounts|floatformat:2 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+            <h4 class="card-title mb-3">Export Options</h4>
+            <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                <a href="{% url 'export_to_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success btn-lg">
+                    <i class="fa fa-file-excel"></i> Export to Excel
+                </a>
+                <a href="{% url 'export_to_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-danger btn-lg">
+                    <i class="fa fa-file-pdf"></i> Export to PDF
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

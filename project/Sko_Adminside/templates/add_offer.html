@@ -32,22 +32,24 @@
     }
 </style>
 
-<div class="container d-flex min-vh-100 align-items-center justify-content-center">
+
+
+ <div class="container d-flex min-vh-100 align-items-center justify-content-center">
     <form method="post" action="" class="bg-white p-4 p-md-5 rounded shadow w-100" style="max-width: 768px;">
         {% csrf_token %}
         <div class="row g-3">
             <!-- Offer Type -->
             <div class="col-md-6">
-                <label for="{{ form.Offer_type.id }}" class="form-label">Offer Type</label>
-                {{ form.Offer_type }}
-                {% if form.Offer_type.errors %}
-                    <div class="text-danger mt-1">{{ form.Offer_type.errors.0 }}</div>
+                <label for="{{ form.offer_type.id }}" class="form-label text-dark">Offer Type</label>
+                {{ form.offer_type }}
+                {% if form.offer_type.errors %}
+                    <div class="text-danger mt-1">{{ form.offer_type.errors.0 }}</div>
                 {% endif %}
-            </div>    
+            </div>   
 
             <!-- Discount Type -->
             <div class="col-md-6">
-                <label for="{{ form.discount_type.id }}" class="form-label">Discount Type</label>
+                <label for="{{ form.discount_type.id }}" class="form-label text-dark">Discount Type</label>
                 {{ form.discount_type }}
                 {% if form.discount_type.errors %}
                     <div class="text-danger mt-1">{{ form.discount_type.errors.0 }}</div>

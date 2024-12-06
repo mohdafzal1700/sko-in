@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,208 +12,127 @@
   <link href="https://fonts.googleapis.com/css2?family=Aclonica&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'style.css' %}">
+  <script src="{% static 'movment.js' %}"></script>
 
-<script src="{% static 'movment.js' %}"></script>
   <style>
-  body {
-    background-color: #1f1f1f;
-    color: #ddd;
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    min-height: 100vh;
-    margin: 0;
-  }
-
-  .sidebar {
-    background-color: #3a3a3a;  /* Dark background */
-    width: 250px;               /* Fixed width */
-    padding-top: 20px;
-    border-radius: 20px;        /* Rounded corners */
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6); /* 3D shadow effect */
-    position: sticky;
-    top: 0;
-    margin: 20px;              /* Adds some spacing around the sidebar */
-    z-index: 10;
-  }
-  .content-section {
-      padding: 20px;
-      background-color: #f4f4f4;
+    body {
+      background-color: #1f1f1f;
+      color: #ddd;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    nav {
+      font-family: 'Aclonica', sans-serif;
+    }
+    .sidebar {
+      background-color: #3a3a3a;
       border-radius: 10px;
-      margin: 20px 0;
+      padding: 20px;
+      min-height: 100vh;
     }
-    
-
-  .main-content {
-    flex: 1;                   /* Takes up the remaining space */
-    background-color: #444;     /* Dark background for the main content */
-    margin: 20px;              /* Adds space between sidebar and content */
-    border-radius: 20px;        /* Rounded corners */
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6); /* 3D shadow effect */
-    padding: 20px;
-  }
-
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    margin: 10px 0;
-    display: block;
-    padding: 10px;
-  }
-
-  .sidebar a.active {
-    background-color: #444;
-    border-radius: 5px;
-  }
-
-  .table-container {
-    background-color: #444;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6); /* Add shadow for 3D effect */
-
-
-    border-spacing: 10px;  /* Horizontal and vertical gap */
-
-  }
-  .btn-edit {
-      background: linear-gradient(135deg, #ffdbf4, #80078894);
-      border: none;
-      color: white;
-      padding: 10px 30px;
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: #ffffff;
       border-radius: 5px;
-      transition: background 0.3s cubic-bezier(0, 0, 1,-0.2);
+      transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
     }
-    
-    .btn-remove {
-      background: linear-gradient(135deg, #ff5e57, #8e00192e);
-      border: none;
-      color: white;
+    .sidebar a i {
+      margin-right: 10px;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #495057;
+      color: #ffffff;
+    }
+    .btn-edit, .btn-remove {
       padding: 10px 20px;
       border-radius: 5px;
-      transition: background 0.3s cubic-bezier(0, 0, 1,-0.2);
     }
-    
-    .btn-edit:hover {
-      background: linear-gradient(135deg, #8d72e1, #b198ff);
-      opacity: 0.9;
+    .content-section {
+      padding: 20px;
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
-    .btn-remove:hover {
-      background: linear-gradient(135deg, #ff3c38, #650014);
-      opacity: 0.9;
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none; /* Hidden on smaller screens */
+      }
+      .offcanvas {
+        width: 250px;
+      }
     }
-    
-
-  table th, table td {
-    font-size: 16px;
-    color: #ddd;
+    .offcanvas {
+      background-color: #2a2a2a; /* Dark background for offcanvas */
+      color: #ffffff; /* White text */
   }
-
-  .search-bar {
-    float: right;
-    margin-right: 20px;
-  }
-  .price-header{
-    width: 150px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;
-        /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-   
-  }
-  .product-header {
-    width: 150px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-     
-    margin-left:10px
-
-  }
-  .stock-header{
-    width: 150px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-    
-
-  }
-  .category-header{
-    width: 150px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
   
+  .offcanvas .offcanvas-header {
+      border-bottom: 1px solid #444; /* Subtle separator */
   }
-  .edit-header{
-    width: 170px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;  
-            /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
   
-    
-    
+  .offcanvas .offcanvas-title {
+      font-size: 1.5rem;
+      font-weight: bold;
   }
-  .product-body{
-    width: 300px;    /* Adjust width */
-    height: 50px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-   
-
-  }
-  .price-body{
-    width: 300px;    /* Adjust width */
-    height: 50px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-
-
-  }
-  .quantity-body{
-    width: 300px;    /* Adjust width */
-    height: 50px;    /* Adjust height */
-    padding:8px;    /* Modify padding */
-   
-    vertical-align: middle;  /* Align text vertically */
   
-    text-align: center; 
-                 
-
-
+  .offcanvas-body ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
   }
-  .category-body{
-    width: 300px;    /* Adjust width */
-    height: 50px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-   
+  
+  .offcanvas-body ul li {
+      margin-bottom: 15px;
   }
-  .edit-or-delete-body {
-    width: 330px;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle;  /* Align text vertically */
-    
-  }.btn-unblock {
-    background: linear-gradient(to right, #00c853, #4caf50); /* Green gradient */
-    color: white;
-}
+  
+  .offcanvas-body ul li a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #ffffff; /* White text */
+      font-size: 1rem; /* Consistent font size */
+      padding: 10px 15px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .offcanvas-body ul li a i {
+      margin-right: 10px; /* Space between icon and text */
+      font-size: 1.2rem;
+  }
+  
+  .offcanvas-body ul li a:hover, .offcanvas-body ul li a.active {
+      background-color: #495057; /* Hover and active state background */
+      transform: translateX(5px); /* Subtle animation */
+      color: #ffffff; /* Keep text white */
+  }
+  
+  .btn-close-white {
+      filter: invert(1); /* Ensure close button is white */
+  }
 
-.btn-block {
-    background: linear-gradient(to right, #ff3d00, #ff5722); /* Red gradient */
-    color: white;
-}
+  .main-content {
+    flex: 1;
+    background-color: #444;
+    margin: 20px;
+    border-radius: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .main-content {
+      margin: 10px; /* Reduce margin on smaller screens */
+      padding: 15px; /* Adjust padding for smaller devices */
+    }
+  }
+
 .cat-header {
     width: auto;    /* Adjust width */
     height: 40px;    /* Adjust height */
@@ -231,86 +150,84 @@
 
 }
 
-.catblock-header{
-    width: auto;    /* Adjust width */
-    height: 40px;    /* Adjust height */
-    padding: 8px;    /* Modify padding */
-    text-align: center;  /* Align text horizontally */
-    vertical-align: middle; 
-}
-
-
 </style>
 
 </head>
 <body class="bg-black text-white d-flex flex-column min-vh-100">
-    <nav class="d-flex justify-content-center align-items-center p-3 sticky-top bg-black" 
-    style="font-family: 'Aclonica', sans-serif; border-bottom: 1px solid grey; z-index: 1030;">
-   
-  
-   <!-- Centered Heading -->
-   <h1 class="fs-2 fw mb-0" style="letter-spacing: .5em; color: white;">SKO.IN</h1>
 
-   <!-- Right placeholder for additional icons or user actions -->
-   <div class="ms-auto">
-       <!-- Add any right-side icons here if needed -->
-   </div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top p-3 border-bottom border-secondary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">SKO.IN</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
 
+  <!-- Offcanvas Sidebar -->
+  <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Menu</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="list-unstyled">
+        <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="{% url 'products' %}" class="{% if request.resolver_match.url_name == 'products' %}active{% endif %}"><i class="fa fa-box"></i> Products</a></li>
+        <li><a href="{% url 'customers' %}" class="{% if request.resolver_match.url_name == 'customers' %}active{% endif %}"><i class="fa fa-users"></i> Customers</a></li>
+        <li><a href="{% url 'category' %}" class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}"><i class="fa-solid fa-shoe-prints"></i> Categories</a></li>
+        <li><a href="{% url 'adminorders' %}" class="{% if request.resolver_match.url_name == 'order' %}active{% endif %}"><i class="fa fa-image"></i> Orders</a></li>
+        <li><a href="{% url 'offer' %}" class="{% if request.resolver_match.url_name == 'offer' %}active{% endif %}"><i class="fa fa-gift"></i> Offers</a></li>
+        <li><a href="{% url 'coupon_list' %}" class="{% if request.resolver_match.url_name == 'coupon' %}active{% endif %}"><i class="fa fa-ticket-alt"></i> Coupons</a></li>
+        <li><a href="{% url 'refund' %}" class="{% if request.resolver_match.url_name == 'refund' %}active{% endif %}"><i class="fa fa-gift"></i> Request</a></li>
+        <li><a href="{% url 'sales_report' %}" class="{% if request.resolver_match.url_name == 'sales_report' %}active{% endif %}"><i class="fa fa-ticket-alt"></i> Sales Report</a></li>
+        <li><a href="{% url 'admin_logout' %}" class="{% if request.resolver_match.url_name == 'logout' %}active{% endif %}"><i class="fa fa-sign-out"></i> Logout</a></li>
+      </ul>
+    </div>
+  </div>
 
-    <!-- Offcanvas Sidebar -->
-    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <!-- Main Layout -->
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar (Visible on Desktop) -->
+      <aside class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+        <ul class="list-unstyled">
+          <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+          <li><a href="{% url 'products' %}" class="{% if request.resolver_match.url_name == 'products' %}active{% endif %}"><i class="fa fa-box"></i> Products</a></li>
+          <li><a href="{% url 'customers' %}" class="{% if request.resolver_match.url_name == 'customers' %}active{% endif %}"><i class="fa fa-users"></i> Customers</a></li>
+          <li><a href="{% url 'category' %}" class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}"><i class="fa-solid fa-shoe-prints"></i> Categories</a></li>
+          <li><a href="{% url 'adminorders' %}" class="{% if request.resolver_match.url_name == 'order' %}active{% endif %}"><i class="fa fa-image"></i> Orders</a></li>
+          <li><a href="{% url 'offer' %}" class="{% if request.resolver_match.url_name == 'offer' %}active{% endif %}"><i class="fa fa-gift"></i> Offers</a></li>
+          <li><a href="{% url 'coupon_list' %}" class="{% if request.resolver_match.url_name == 'coupon' %}active{% endif %}"><i class="fa fa-ticket-alt"></i> Coupons</a></li>
+          <li><a href="{% url 'refund' %}" class="{% if request.resolver_match.url_name == 'refund' %}active{% endif %}"><i class="fa fa-gift"></i> Request</a></li>
+          <li><a href="{% url 'sales_report' %}" class="{% if request.resolver_match.url_name == 'sales_report' %}active{% endif %}"><i class="fa fa-ticket-alt"></i> Sales Report</a></li>
+          <li><a href="{% url 'admin_logout' %}" class="{% if request.resolver_match.url_name == 'logout' %}active{% endif %}"><i class="fa fa-sign-out"></i> Logout</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body">
-            <ul class="list-unstyled">
-                <li><a href="#" class="text-white text-decoration-none">Home</a></li>
-                <li><a href="#" class="text-white text-decoration-none">About</a></li>
-                <li><a href="#" class="text-white text-decoration-none">Services</a></li>
-                <li><a href="#" class="text-white text-decoration-none">Contact</a></li>
-            </ul>
+        {% endfor %}
+
+        {% block content %}
+        <div class="content-section">
+          <!-- Placeholder for dynamic content -->
         </div>
+        {% endblock %}
+      </main>
     </div>
+  </div>
 
-
-  <!-- Messages Section -->
-  {% for message in messages %}
-  {% if message.tags == "error" %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% elif message.tags == "success" %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% else %}
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% endif %}
-{% endfor %}
-
-  <!-- Main Content -->
-  
-      {% block content %}
-     
-      {% endblock %}
-    
-<!-- Footer -->
-<footer class="text-center p-4">
-    <div class=" text-white small">
-        © 2024 SKO.IN VENTURES PVT LTD
-    </div>
+  <!-- Footer -->
+  <footer class="text-center p-4 mt-auto small text-white">
+    &copy; 2024 SKO.IN VENTURES PVT LTD
   </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
-  
-  
 
 </body>
 </html>

@@ -1,0 +1,889 @@
+{% extends 'secondbase.html' %}
+
+{% block title %}Cart List Page{% endblock %}
+
+{% block content %}
+<style>
+  /* Overall Cart Page Styling */
+  .cart-page {
+    min-height: 100%;
+    padding-bottom: 80px;
+  }
+
+  /* General Text Styling */
+  .text-responsive {
+    font-size: 1rem;
+  }
+  .text-small-responsive {
+    font-size: 0.9rem;
+  }
+  
+  /* Scrollable Cart Items Container */
+  #cartItemsContainer {
+    max-height: 50vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  #cartItemsContainer::-webkit-scrollbar {
+    width: 6px;
+  }
+  #cartItemsContainer::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 10px;
+  }
+  
+  /* Coupon Section Styling */
+  .coupon-section {
+    background-color: #333;
+    color: #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .coupon-section h5 {
+    font-size: 1.1rem;
+  }
+  .coupon-section .input-group select {
+    background-color: #444;
+    color: #e0e0e0;
+    border-color: #555;
+  }
+  
+  /* Order Summary Styling */
+  .order-summary {
+    background-color: #f8f9fa;
+    color: #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .order-summary h5 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .order-summary .summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .text-responsive {
+      font-size: 0.9rem;
+    }
+    .text-small-responsive {
+      font-size: 0.8rem;
+    }
+    .coupon-section, .order-summary {
+      padding: 1rem;
+    }
+  }
+</style>
+<style>
+  /* Custom Styles for Layout */
+  .coupon-section {
+    background-color: #333;
+    color: #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .coupon-section h5 {
+    font-size: 1.1rem;
+  }
+  .coupon-section .input-group select {
+    background-color: #444;
+    color: #e0e0e0;
+    border-color: #555;
+  }
+  
+  .order-summary {
+    background-color: #f8f9fa;
+    color: #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .order-summary h5 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .order-summary .summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .coupon-section, .order-summary {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<div class="container py-4 cart-page">
+  <h1 class="text-responsive fw-bold text-start mt-1 mb-4">YOUR CART</h1>
+  
+  {% if is_empty %}
+    <div class="text-center my-5">
+      <p class="text-muted">Your cart is empty!</p>
+      <a href="{% url 'product_list' %}" class="btn btn-outline-light mt-3 px-4 py-2">Continue Shopping</a>
+    </div>
+  {% else %}
+    <div class="row">
+      <!-- Cart Items Column -->
+      <div class="col-lg-8 mb-4">
+        <div id="cartItemsContainer">
+          <div id="cartItems">
+            {% for item in cart_items %}
+              <div id="item-{{ item.id }}" class="card bg-dark text-white border-secondary mb-4">
+                <div class="card-body d-flex align-items-center text-responsive">
+                  <!-- Product Information -->
+                  <div class="col-4 d-flex align-items-center gap-3">
+                    <img src="{{ item.variant.images.first.image.url }}" alt="{{ item.variant.product.name }}" width="96" height="96" class="rounded">
+                    <div>
+                      <h5 class="fw-medium mb-1 text-small-responsive">{{ item.variant.product.name }}</h5>
+                      <span class="text-secondary line-through">Rs. {{ item.variant.price|floatformat:2 }}</span>
+                      <span>Rs. {{ item.variant.get_discounted_price|floatformat:2 }}</span>
+                      <div class="text-secondary small">Size: {{ item.variant.size }} | Color: {{ item.variant.color }}</div>
+                    </div>
+                  </div>
+                  <!-- Quantity Controls -->
+                  <div class="col-4 d-flex justify-content-center align-items-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm custom-btn-icon decrease-btn" 
+                            data-item-id="{{ item.id }}" 
+                            data-variant-id="{{ item.variant.id }}">-</button>
+                    <input type="text" id="quantity-{{ item.id }}" 
+                           class="form-control text-center bg-dark text-white" 
+                           value="{{ item.quantity }}" readonly style="width: 50px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm custom-btn-icon increase-btn" 
+                            data-item-id="{{ item.id }}" 
+                            data-variant-id="{{ item.variant.id }}">+</button>
+                  </div>
+      
+                  <!-- Item Total and Remove Button -->
+                  
+            <div class="col-4 d-flex justify-content-end align-items-center gap-3">
+              <span id="totalPrice-{{ item.id }}">Rs. {{ item.total_price|floatformat:2 }}</span>
+                    <a href="{% url 'delete_cart' pk=item.id %}" class="btn btn-outline-danger">🗑️</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon and Order Summary Column -->
+      <div class="col-lg-4">
+        <!-- Coupon Section -->
+        <div class="coupon-section mb-4">
+          <h5>Apply a Coupon</h5>
+          <div class="input-group">
+            {% if selected_coupon_code %}
+              <p>Applied Coupon: {{ selected_coupon_code }} - Discount: ₹{{ coupon_discount|floatformat:2 }}</p>
+              <button id="removeCouponButton" class="btn btn-danger ms-2">Remove Coupon</button>
+            {% else %}
+              <select name="coupon_code" class="form-control" id="couponCodeInput">
+                <option value="">Select a Coupon</option>
+                {% for coupon in available_coupons %}
+                  <option value="{{ coupon.code }}">{{ coupon.code }} - {% if coupon.discount_type == 'PERCENTAGE' %}Save {{ coupon.value }}%{% else %}Save ₹{{ coupon.value }}{% endif %}</option>
+                {% endfor %}
+              </select>
+              <button id="applyCouponButton" class="btn btn-primary ms-2">Apply</button>
+            {% endif %}
+          </div>
+          {% if not available_coupons %}
+            <p class="text-warning mt-2">No coupons available at the moment.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>      
+        </div>
+
+        <!-- Order Summary Section -->
+       <!-- Order Summary Section -->
+<div class="order-summary">
+  <h5>Order Summary</h5>
+
+  <!-- Original Subtotal -->
+  <div class="summary-item">
+    <span>Original Price:</span>
+    <span id="estimatedTotal">₹{{ total_price|floatformat:2 }}</span>
+  </div>
+
+  <!-- Coupon Discount (only displayed if a coupon is applied) -->
+  {% if selected_coupon_code %}
+    <div class="summary-item">
+      <span>Coupon Discount:</span>
+      <span id="couponDiscount">- ₹{{ coupon_discount|floatformat:2 }}</span>
+    </div>
+  {% endif %}
+
+  <!-- Discounted Total (Subtotal minus Coupon Discount) -->
+  {% if selected_coupon_code %}
+  <div class="summary-item">
+    <span>Discounted Total:</span>
+    <span id="discountedTotal">₹{{ discounted_total|floatformat:2 }}</span>
+  </div>
+  {% endif %}
+
+  <!-- Final Grand Total -->
+  <div class="summary-item font-weight-bold">
+    <span>Grand Total:</span>
+    <span id="grandTotal">₹{{ discounted_total|floatformat:2 }}</span>
+  </div>
+</div>
+ 
+          <p class="text-secondary small mt-2">Taxes, discounts, and shipping calculated at checkout.</p>
+          <a href="{% url 'checkout' %}" class="btn btn-secondary w-100 mt-3">Check Out</a>
+        </div>
+        
+      </div>
+    </div>
+  {% endif %}
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function updateQuantity(itemId, variantId, quantityChange) {
+    let quantityField = document.getElementById("quantity-" + itemId);
+    if (!quantityField) return;
+
+    let currentQuantity = parseInt(quantityField.value);
+    let newQuantity = currentQuantity + quantityChange;
+
+    if (newQuantity < 1) {
+      alert("Quantity cannot be less than 1.");
+      return;
+    }
+
+    if (newQuantity > 4) {
+      alert("Cannot purchase more than 4 items at a time.");
+      return;
+  }
+
+    $.ajax({
+        url: '{% url "update_cart_item" %}', 
+        type: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        data: JSON.stringify({
+            'item_id': itemId,
+            'variant_id': variantId,
+            'quantity': newQuantity
+        }),
+        success: function(response) {
+          if (response.success) {
+              // Update the quantity and price displayed
+              quantityField.value = response.new_quantity;
+              document.getElementById('totalPrice-' + itemId).innerText = 
+                  response.item_total_price;
+
+                 // Update grand total and discounted total
+                document.getElementById('grandTotal').innerText = response.grand_total;
+                document.getElementById('discountedTotal').innerText = response.discounted_total;
+             }
+            } else {
+                alert(response.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Error updating cart: ' + error);
+        }
+    });
+}
+
+$(document).ready(function() {
+    $('.decrease-btn, .increase-btn').click(function() {
+        let itemId = $(this).data('item-id');
+        let variantId = $(this).data('variant-id');
+        let isIncrease = $(this).hasClass('increase-btn');
+        updateQuantity(itemId, variantId, isIncrease ? 1 : -1);
+    });
+});
+</script>
+<script>
+  document.querySelector("#applyCouponButton").addEventListener("click", function() {
+    const couponCode = document.querySelector("select[name='coupon_code']").value;
+
+    fetch("{% url 'apply_coupon_to_cart' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ coupon_code: couponCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            // Ensure that the data values are numbers and not undefined or null
+            const couponDiscount = parseFloat(data.coupon_discount);
+            const discountedTotal = parseFloat(data.discounted_total);
+            const grandTotal = parseFloat(data.grand_total);
+            const totalPrice = parseFloat(data.total_price);
+
+            // Check if any of the values are NaN (not a number) and handle the error
+            if (isNaN(couponDiscount) || isNaN(discountedTotal) || isNaN(grandTotal) || isNaN(totalPrice)) {
+                alert("Error: Invalid values received for coupon discount or totals.");
+                return;
+            }
+
+            // Update the cart total and discount display in the template
+            const couponDiscountElem = document.getElementById("couponDiscount");
+            const discountedTotalElem = document.getElementById("discountedTotal");
+            const grandTotalElem = document.getElementById("grandTotal");
+            const estimatedTotalElem = document.getElementById("estimatedTotal");
+
+            // Only update the elements if they exist in the DOM
+            if (couponDiscountElem) {
+                couponDiscountElem.textContent = `- ₹${couponDiscount.toFixed(2)}`;
+            }
+            if (discountedTotalElem) {
+                discountedTotalElem.textContent = `₹${discountedTotal.toFixed(2)}`;
+            }
+            if (grandTotalElem) {
+                grandTotalElem.textContent = `₹${grandTotal.toFixed(2)}`;
+            }
+            if (estimatedTotalElem) {
+                estimatedTotalElem.textContent = `₹${totalPrice.toFixed(2)}`;
+            }
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+ </script>
+ <script>
+  document.getElementById('removeCouponButton')?.addEventListener('click', function() {
+    fetch("{% url 'remove_coupon_from_cart' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      }
+    });
+  });
+  
+ </script>
+    
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
+
+{% comment %} 
+def delete_cart(request, pk):
+    
+    if request.user.is_authenticated:
+        if not request.user.is_active:
+            messages.error(request, "Your account is inactive. Please contact support.")
+            return redirect('user_login')  
+    else:
+        return redirect('user_login')
+    
+    try:
+        item = CartItem.objects.get(pk=pk, cart__user=request.user, cart__is_active=True)
+        
+    except CartItem.DoesNotExist:
+       
+        messages.error(request, "Item not found or you don't have permission to delete it.")
+        return redirect('cart_view')
+    
+    item.delete()
+    messages.success(request, "Item removed from cart.")
+    return redirect('cart_view')
+
+from decimal import Decimal
+def cart_view(request):
+    if request.user.is_authenticated:
+        if not request.user.is_active:
+            messages.error(request, "Your account is inactive. Please contact support.")
+            return redirect('user_login')  
+    else:
+        return redirect('user_login')
+    
+    cart = Cart.objects.filter(user=request.user, is_active=True).first()
+    cart_items = cart.cart_items.all() if cart else [] 
+    total_price = cart.total_price if cart else 0
+    discounted_total = cart.discounted_total if cart else total_price
+    
+    is_empty = len(cart_items) == 0
+    
+    # Fetch available coupons for the cart
+    available_coupons = Coupon.objects.filter(
+        is_active=True,
+        end_date__gte=timezone.now(),
+        minimum_purchase_amount__lte=total_price  
+    )
+
+    # Initialize selected_coupon_code and coupon_discount
+    selected_coupon_code = None
+    coupon_discount = 0.0  # Default if no coupon is applied
+    
+    # If the user has applied a coupon, set the selected_coupon_code and coupon_discount
+    if request.session.get('selected_coupon_code'):
+        selected_coupon_code = request.session['selected_coupon_code']
+        coupon = Coupon.objects.filter(code=selected_coupon_code, is_active=True).first()
+        if coupon:
+            # Calculate the coupon discount
+            coupon_discount = coupon.calculate_discount(total_price)
+    
+    print(f'Selected Coupon Code: {selected_coupon_code}, Coupon Discount: {coupon_discount}')
+
+    return render(request, 'add_to_cart.html', {
+        'cart_items': cart_items,
+        'discounted_total': discounted_total,
+        'total_price': total_price,
+        'is_empty': is_empty,
+        'available_coupons': available_coupons,
+        'selected_coupon_code': selected_coupon_code,  # Pass selected_coupon_code to the template
+        'coupon_discount': coupon_discount,  # Pass coupon_discount to the template
+    })
+
+    
+
+
+@require_http_methods(["POST"])
+def apply_coupon_to_cart(request):
+    print("apply_coupon_to_cart view called") 
+    try:
+        # Ensure the request is coming with JSON data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            coupon_code = data.get('coupon_code')
+            print(f"Coupon Code: {coupon_code}")
+
+            if not coupon_code:
+                return JsonResponse({"error": "No coupon code provided."}, status=400)
+
+            # Fetch the cart and coupon
+            cart = Cart.objects.filter(user=request.user, is_active=True).first()
+            if not cart:
+                return JsonResponse({"error": "Cart not found."}, status=404)
+
+            coupon = Coupon.objects.filter(code=coupon_code, is_active=True).first()
+            if not coupon:
+                return JsonResponse({"error": "Invalid coupon code."}, status=400)
+
+            # Check if coupon is valid for the cart
+            valid, message = coupon.is_valid(cart.total_price)
+            print(f"Coupon Valid: {valid}, Message: {message}") 
+            if not valid:
+                return JsonResponse({"error": message}, status=400)
+
+            # Apply coupon and calculate discounts
+            discount = coupon.calculate_discount(cart.total_price)
+            discounted_total = cart.total_price - discount
+            grand_total = discounted_total  # In case there's no additional shipping cost, etc.
+        
+
+            cart.coupon = coupon  
+            cart.save()
+            
+            request.session['selected_coupon_code'] = coupon_code  # Save selected coupon code in session
+
+            print(f"Coupon Code Stored in Session: {request.session.get('selected_coupon_code')}")  # Debugging line
+            # Update the cart with the coupon applied
+            cart.apply_coupon()  # Assuming you handle applying coupon here
+
+            # Return JSON response with the updated totals
+            return JsonResponse({
+                "total_price": cart.total_price,
+                "coupon_discount": discount,
+                "discounted_total": discounted_total,
+                "grand_total": grand_total,
+            })
+        else:
+            return JsonResponse({"error": "Invalid content type. Expected JSON."}, status=400)
+    except Exception as e:
+        # If any error occurs, return a JSON response with the error
+        return JsonResponse({"error": str(e)}, status=500)
+    
+    
+def remove_coupon_from_cart(request):
+    try:
+        # Fetch the user's cart
+        cart = Cart.objects.filter(user=request.user, is_active=True).first()
+        if not cart:
+            return JsonResponse({"error": "Cart not found."}, status=404)
+        
+        # Remove the coupon and update the cart
+        cart.coupon = None
+        cart.save()
+
+        # Clear the session's stored coupon code
+        if 'selected_coupon_code' in request.session:
+            del request.session['selected_coupon_code']
+
+        # Return the updated cart data (original price without discount)
+        return JsonResponse({
+            "total_price": cart.total_price,  # The original price
+            "coupon_discount": 0,  # No discount
+            "discounted_total": cart.total_price,  # No discount applied
+            "grand_total": cart.total_price  # Grand total is same as original price
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+    
+@require_http_methods(["POST"])
+def update_cart_item(request):
+    if request.user.is_authenticated:
+        if not request.user.is_active:
+            messages.error(request, "Your account is inactive. Please contact support.")
+            return redirect('user_login')  
+    else:
+        return redirect('user_login')
+    
+    try:
+        data = json.loads(request.body)
+        item_id = data.get('item_id')
+        quantity = data.get('quantity')
+        
+        if quantity < 1:
+            return JsonResponse({
+                'success': False,
+                'error': 'Quantity cannot be less than 1'
+            })
+        
+        cart_item = CartItem.objects.select_related('variant', 'cart').get(
+            id=item_id,
+            cart__user=request.user,
+            cart__is_active=True
+        )
+
+        if quantity > cart_item.variant.stock:
+            return JsonResponse({
+                'success': False,
+                'error': f'Only {cart_item.variant.stock} units available'
+            })
+        
+        cart_item.quantity = min(quantity, 4)  # Ensure max 4 items
+        cart_item.save()
+        
+        cart = cart_item.cart
+        total_amount = sum(item.total_price for item in cart.cart_items.all())
+        
+        if cart.coupon:
+            cart.apply_coupon()
+            discounted_total = cart.discounted_total  # Get the discounted price
+        else:
+            discounted_total = total_amount
+        
+        return JsonResponse({
+            'success': True,
+            'new_quantity': cart_item.quantity,
+            'item_total_price': int(cart_item.total_price),  # Ensure it's a number
+            'total_amount': int(total_amount),
+            'discounted_total': int(discounted_total), 
+        })
+        
+    except CartItem.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Cart item not found'
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+ 
+from django.views.decorators.csrf import csrf_protect
+
+
+@csrf_protect  # This ensures CSRF protection
+def set_primary_address(request):
+    
+    if request.user.is_authenticated:
+        if not request.user.is_active:
+            messages.error(request, "Your account is inactive. Please contact support.")
+            return redirect('user_login')  
+    else:
+        return redirect('user_login')
+    
+    if request.user.is_authenticated:
+        try:
+            data = json.loads(request.body)
+            address_id = data.get('address_id')
+
+            
+            address = Address.objects.filter(id=address_id, user=request.user).first()
+            if address:
+                
+                Address.objects.filter(user=request.user).update(is_primary=False)
+                
+                
+                address.is_primary = True
+                address.save()
+                
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Address not found or unauthorized'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=403) 
+
+
+
+
+def checkout(request):
+    if request.user.is_authenticated:
+        if not request.user.is_active:
+            messages.error(request, "Your account is inactive. Please contact support.")
+            return redirect('user_login')  
+    else:
+        return redirect('user_login')
+    
+    user_address = Address.objects.filter(user=request.user, is_delete=False)
+    paymentmethod = PaymentMethod.objects.all()
+    profile = get_object_or_404(userprofile, user=request.user)
+    print(profile.mobile)
+    
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cartitem = CartItem.objects.filter(cart=cart)
+    except Cart.DoesNotExist:
+        cart = None
+        cartitem = []
+        
+    total_price = cart.discounted_total
+    official = sum(item.total_official for item in cartitem)
+    final_official = official
+    final_total_price = total_price 
+    
+    user_address_json = serialize('json', user_address, fields=('address_line_1', 'address_line_2', 'city', 'state', 'postal_code', 'is_primary'))   
+    
+    context = {
+        "profile": profile,
+        "user_address": user_address,
+        "paymentmethod": paymentmethod,
+        "cart": cart,
+        "total_price": total_price,
+        'official': official,
+        "cartitem": cartitem,
+        "final_total_price": final_total_price,
+        'final_official': final_official,
+        "user_address_json": user_address_json
+    }
+
+    return render(request, 'checkout.html', context)
+ {% endcomment %}
+ <div class="action-buttons">
+  <button class="btn btn-info fixed-size-btn" data-bs-toggle="modal" data-bs-target="#orderModal{{ order_item.order.id }}">
+    View
+</button>
+
+@login_required(login_url='/adminlogin/')
+def dashboard(request):
+    today = timezone.localtime(timezone.now()).date()  # Get today's date in a timezone-aware manner
+    print(f"Today's date: {today}")
+
+    # Parse the start_date and end_date from the form (already in string format from input)
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    print(f"Received start_date: {start_date}, end_date: {end_date}")
+
+    # Convert the start_date and end_date into timezone-aware datetime objects
+    if start_date:
+        start_date = timezone.make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
+        print(f"Converted start_date to timezone-aware: {start_date}")
+    else:
+        # Make today - 30 days timezone-aware
+        start_date = timezone.make_aware(datetime.combine(today - timedelta(days=30), datetime.min.time()))
+        print(f"Set default start_date (30 days ago): {start_date}")
+
+    if end_date:
+        end_date = timezone.make_aware(datetime.strptime(end_date, "%Y-%m-%d"))
+        print(f"Converted end_date to timezone-aware: {end_date}")
+    else:
+        # Make today end of day timezone-aware
+        end_date = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+        print(f"Set default end_date (end of today): {end_date}")
+
+    # Calculate period orders
+    def calculate_period_orders(start_date, end_date):
+        period_orders = Order.objects.filter(added_date__range=[start_date, end_date])
+        period_sales = 0
+        period_discounts = 0
+
+        # Calculate sales and discounts in a more efficient way
+        for order in period_orders:
+            for item in order.order_items.all():
+                variant_price = item.variant.price
+                quantity = item.quantity
+
+                # Check for active offers
+                offer = Offer.objects.filter(
+                    Q(product=item.variant.product) | Q(category=item.variant.product.category),
+                    start_date__lte=timezone.now(),
+                    end_date__gte=timezone.now(),
+                    is_active=True
+                ).first()
+
+                if offer:
+                    discount_price = offer.apply_discount(variant_price)
+                    discount_amount = (variant_price - discount_price) * quantity
+                    period_discounts += discount_amount
+                    period_sales += discount_price * quantity
+                else:
+                    period_sales += variant_price * quantity
+
+            # Apply coupon discount if applicable
+            if order.coupon and order.coupon.is_valid(order.total_amount):
+                coupon_discount = order.coupon.calculate_discount(order.total_amount) or 0
+                period_discounts += coupon_discount
+
+        return {'sales': period_sales, 'discounts': period_discounts}
+
+    period_sales_data = calculate_period_orders(start_date, end_date)
+
+    # Best-selling products
+    top_selling_products = OrderItem.objects.values('variant__product__name') \
+        .annotate(total_sales=Sum(F('quantity') * F('variant__price'))) \
+        .filter(order__added_date__range=[start_date, end_date]) \
+        .order_by('-total_sales')[:10]
+
+    # Best-selling categories
+    top_selling_categories = OrderItem.objects.values('variant__product__category__name') \
+        .annotate(total_sales=Sum(F('quantity') * F('variant__price'))) \
+        .filter(order__added_date__range=[start_date, end_date]) \
+        .order_by('-total_sales')[:10]
+
+    # Chart Data Preparation
+    sales_by_day = OrderItem.objects.filter(order__added_date__range=[start_date, end_date]) \
+        .annotate(sales_date=TruncDate('order__added_date')) \
+        .values('sales_date') \
+        .annotate(total_sales=Sum(F('quantity') * F('variant__price'))) \
+        .order_by('sales_date')
+
+    chart_labels = []
+    chart_data = []
+    current_date = start_date
+    while current_date <= end_date:
+        label = current_date.strftime('%A, %b %d')
+        chart_labels.append(label)
+        print('chart_label',chart_labels)
+
+        # Get sales on the current date, default to 0 if no sales on this date
+        sales_on_date = next((day['total_sales'] for day in sales_by_day if day['sales_date'] == current_date), 0)
+        chart_data.append(float(sales_on_date))
+
+        current_date += timedelta(days=1)
+        print('chart_data',chart_data)
+
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_sales': period_sales_data['sales'],
+        'total_discounts': period_sales_data['discounts'],
+        'total_orders': Order.objects.filter(added_date__range=[start_date, end_date]).count(),
+        'top_selling_products': top_selling_products,
+        'top_selling_categories': top_selling_categories,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+    }
+    Coupon bamboo20 has expired.
+Coupon hei50 usage limit reached. Used count: 180
+Coupon hei50 usage limit reached. Used count: 181
+Coupon hei50 usage limit reached. Used count: 182
+Coupon hei50 usage limit reached. Used count: 183
+Coupon hei50 usage limit reached. Used count: 184
+Coupon hei50 usage limit reached. Used count: 185
+Coupon hei50 usage limit reached. Used count: 186
+Coupon hei50 usage limit reached. Used count: 187
+    .main-content {
+      flex: 1;                   /* Takes up the remaining space */
+      background-color: #444;     /* Dark background for the main content */
+      margin: 20px;              /* Adds space between sidebar and content */
+      border-radius: 20px;        /* Rounded corners */
+      box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6); /* 3D shadow effect */
+      padding: 20px;
+    }
+  {% if order_item.status == "Pending" %}
+    <a href="javascript:void(0);" onclick="showCancelPopup({{ order_item.id }})" class="btn btn-danger">Cancel Order</a>
+    <div id="cancel-popup-{{ order_item.id }}" class="cancel-popup" style="display: none;">
+      <div class="popup-content">
+        <span class="close-btn" onclick="hideCancelPopup({{ order_item.id }})">&times;</span>
+        <form action="{% url 'cancelorder' order_item.id %}" method="post">
+          {% csrf_token %}
+          <h4>Reason for Cancellation</h4>
+          <textarea name="cancel_reason" class="cancel-reason-textarea" placeholder="Enter your reason..." required></textarea>
+          <div class="button-group">
+            <button type="submit" class="btn btn-danger">Submit</button>
+            <button type="button" class="btn btn-secondary" onclick="hideCancelPopup({{ order_item.id }})">Close</button>
+          </div>
+        </div>
+      </div>
+      
+{% elif order_item.status == "Delivered" %}
+<!-- Return Button -->
+<a href="javascript:void(0);" onclick="showReturnPopup({{ order_item.id }})" class="btn btn-warning fixed-size-btn">Return</a>
+
+<!-- Return Reason Popup -->
+<div id="return-popup-{{ order_item.id }}" class="return-popup" style="display: none;">
+<div class="popup-content">
+<!-- Close Button -->
+<span class="close-btn" onclick="hideReturnPopup({{ order_item.id }})">&times;</span>
+
+<!-- Return Form -->
+<form action="{% url 'returnorder' order_item.id %}" method="post">
+{% csrf_token %}
+<h4>Reason for Return</h4>
+<textarea name="return_reason" id="return_reason_{{ order_item.id }}" 
+      class="form-control" 
+      placeholder="Enter your reason for return..." 
+      required></textarea>
+<div class="button-group mt-3">
+<button type="submit" class="btn btn-danger">Submit</button>
+<button type="button" class="btn btn-secondary" onclick="hideReturnPopup({{ order_item.id }})">Close</button>
+
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

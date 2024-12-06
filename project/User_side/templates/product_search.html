@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Search{% endblock %}
+
+{% block content %}
+<style>
+  .search-container {
+    background-color: #f8f9fa;
+    padding: 2rem;
+  }
+
+  .search-header {
+    color: #333;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-card {
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .search-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .search-image {
+    object-fit: cover;
+    width: 100%;
+    height: 180px;
+    background-color: #e9ecef;
+  }
+
+  .search-card-body {
+    padding: 1rem;
+  }
+
+  .search-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-prices {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .search-prices .line-through {
+    text-decoration: line-through;
+    color: #6c757d;
+  }
+
+  .btn-primary {
+    font-size: 0.85rem;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    border: none;
+    transition: background-color 0.3s;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="search-container">
+  <h1 class="search-header">Product Search</h1>
+
+  {% if product_list %}
+    <div class="row g-4">
+      {% for product in product_list %}
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="search-card">
+            <a href="{% url 'product_view' product.pk %}">
+              {% with variant=product.variants.first %}
+                {% if variant %}
+                  <img src="{{ variant.images.first.image.url }}" alt="{{ product.name }}" class="search-image">
+                {% else %}
+                  <img src="/path/to/placeholder.jpg" alt="Placeholder Image" class="search-image">
+                {% endif %}
+              {% endwith %}
+            </a>
+
+            <div class="search-card-body">
+              <h5 class="search-title">{{ product.name }}</h5>
+              <div class="search-prices">
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No products found matching your search. <a href="{% url 'product_list' %}" class="btn btn-primary">Continue Shopping</a></p>
+  {% endif %}
+</div>
+{% endblock %}

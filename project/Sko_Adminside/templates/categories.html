@@ -2,134 +2,160 @@
 
 {% block content %}
 <style>
-
     .custom-thead {
-    background-color: #d3c4c4;
-    color: #e3dbdb;
-    text-transform: uppercase;
-    font-weight: bold;
-        
-    z-index: 1;
-}
-.table-container {
-    padding: 15px;
-}
+        background-color: #343a40;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-weight: bold;
+        z-index: 1;
+    }
 
-.table th, .table td {
-    padding: 12px; /* Consistent padding for smooth alignment */
-    vertical-align: middle; /* Center content vertically */
-    text-align: center; /* Center align text in both header and body */
-}
+    .table-container, .card-container {
+        padding: 15px;
+    }
 
-.table thead th {
-    background-color: #343a40;
-    color: #ffffff;
-}
+    .table th, .table td {
+        padding: 12px;
+        vertical-align: middle;
+        text-align: center;
+    }
 
-.table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.1); /* Smooth hover effect */
-}
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
 
+    /* Card style for responsive design */
+    .card-container .category-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-.table-hover tbody tr:hover {
-    background-color: #196185;
-}
+    .category-card h5 {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #333;
+    }
 
-        
+    .category-card .btn {
+        margin-right: 10px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .table-container {
+            display: none; /* Hide table on small screens */
+        }
+        .card-container {
+            display: block; /* Show cards on small screens */
+        }
+    }
+
+    @media (min-width: 769px) {
+        .table-container {
+            display: block; /* Show table on large screens */
+        }
+        .card-container {
+            display: none; /* Hide cards on large screens */
+        }
+    }
 </style>
 
-<div>
-    <div class="d-flex mt-3">
-        <div class="sidebar">
-            <a href="{% url 'dashboard' %}" data-section="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
-            <a href="{% url 'products' %}" data-section="products"><i class="fa fa-box"></i> Products</a>
-            <a href="{% url 'customers' %}" data-section="customers"><i class="fa fa-users"></i> Customers</a>
-            <a href="{% url 'category' %}" data-section="categories"><i class="fa-solid fa-shoe-prints"></i> Categories</a>
-            <a href="{% url 'adminorders' %}" data-section="order"><i class="fa fa-image"></i> Orders</a>
-            <a href="{% url 'offer' %}" data-section="banner"><i class="fa fa-image"></i> Offers</a>
-            <a href="{% url 'admin_logout' %}" data-section="logout"><i class="fa fa-sign-out"></i> Logout</a>
+<div class="container mt-4">
+    <!-- Page Heading -->
+    <div class="main-content w-100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Categories</h2>
+        <div>
+            <!-- Add Category Button -->
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                Add Category +
+            </button>
         </div>
+    </div>
 
-        <div class="main-content">
-            <!-- Product Management and Table -->
-            <div class="product-management-section mb-4">
-                <!-- Sticky Button Section (as a separate column) -->
-                <div class="sticky-button-section mb-2">
-                    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                        Add Category + 
-                    </button>
-                    <form method="POST" action="{% url 'searchCategory' %}" class="d-inline-block ms-2">
-                        {% csrf_token %}
-                        <input type="text" name="search" class="form-control d-inline-block w-auto search-bar" placeholder="Search" />
-                        <button type="submit" class="btn btn-primary">Search</button> <!-- Optional button for submitting the form -->
-                    </form>
-                </div>
-                </div>
+    <!-- Search Bar -->
+    <form method="POST" action="{% url 'searchCategory' %}" class="mb-3">
+        {% csrf_token %}
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search categories" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
 
-                <!-- Table Header Section -->
-                                <!-- Table Header Section -->
-                    <div class="table-header">
-                        <table class="table table-dark table-hover">
-                            <thead class="custom-thead">
-                                <tr>
-                                    <th class="cat-header ps-5">Category</th>
-                                    <th class="editcat-header me-1">Edit</th>
-                                    <th class="catblock-header">Block/Unblock</th>
-                                </tr>
-                            </thead>
-                       
-                    </div>
+    <!-- Table View for Large Screens -->
+    <div class="table-container">
+        <table class="table table-dark table-hover">
+            <thead class="custom-thead">
+                <tr>
+                    <th>Category</th>
+                    <th>Edit</th>
+                    <th>Block/Unblock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for catgry in data %}
+                <tr>
+                    <td>{{ catgry.name }}</td>
+                    <td>
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                            onclick="populateEditModal('{{ catgry.id }}', '{{ catgry.name }}')">
+                            Edit
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
+                            data-category-id="{{ catgry.id }}">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-                    <!-- Table Body Section with Scroll -->
-                    <div class="table-container mt-3">
-                        
-                            <tbody class="custom-tbody">
-                                {% for catgry in data %}
-                                <tr class="custom-row">
-                                    <td class="product-body">{{ catgry.name }}<br /></td>
-                                    <td>
-                                        <button type="button" class="btn-edit btn-dark" data-bs-toggle="modal" 
-                                            data-bs-target="#editCategoryModal" 
-                                            onclick="populateEditModal('{{ catgry.id }}', '{{ catgry.name }}')">
-                                            Edit
-                                        </button>
-                                    </td>
-                                    
-                                    <td>
-                                        <button type="button" 
-                                                class="btn btn-remove" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#deleteConfirmationModal" 
-                                                data-category-id="{{ catgry.id }}">
-                                            Remove
-                                        </button>
-                                    </td>
-                                    
-                                    
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+    <!-- Card View for Small Screens -->
+    <div class="card-container">
+        {% for catgry in data %}
+        <div class="category-card">
+            <h5>{{ catgry.name }}</h5>
+            <div>
+                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                    onclick="populateEditModal('{{ catgry.id }}', '{{ catgry.name }}')">
+                    Edit
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
+                    data-category-id="{{ catgry.id }}">
+                    Remove
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
-
-    <!-- Modal Structure -->
-    <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px;"> <!-- Adjust the modal width -->
-            <div class="modal-content" style="background-color: #DCDCDC; border-radius: 10px; color: black; text-align: center;"> <!-- Center alignment -->
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px;">
+            <div class="modal-content" style="background-color: #DCDCDC; border-radius: 10px; color: black;">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addCategoryModalLabel" style="margin: 0 auto;">Add New Category</h5> <!-- Center the title -->
+                    <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="addCategoryForm" method="POST" action="{% url 'add_categories' %}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="category_name" style="color: black; text-align: center; width: 100%;">Category Name</label> <!-- Center the label -->
-                            <input type="text" name="category_name" id="category_name" class="form-control" style="color: black; margin: 0 auto; width: 90%; border-radius: 10px;" required> <!-- Center and style the input -->
+                            <label for="category_name">Category Name</label>
+                            <input type="text" name="category_name" id="category_name" class="form-control" required>
                         </div>
-                        <div class="modal-footer" style="justify-content: center;"> <!-- Center the submit button -->
-                            <button type="submit" class="btn btn-primary" style="width: 100px;">Submit</button> <!-- Adjust button width -->
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
                 </div>

@@ -51,14 +51,14 @@
 
 <div class="container-fluid min-vh-100 p-4 d-flex gap-4">
   <!-- Sidebar -->
-  <div class="d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 16rem;">
+  <div class=" side d-none d-md-block card bg-zinc-800 text-white p-3 ms-3" style="width: 25rem;">
     <h5 class="fw-semibold mb-2">Manage My Account</h5>
     <a href="{% url 'Userprofile' %}" class="text-decoration-none dull-hover">
-        <p class="text-danger ms-3 mb-3 mt-4">My Profile</p>
+        <p class="text-danger ms-3 mb-3 mt-4 fs-6">My Profile</p>
     </a>
     
     <a href="{% url 'address' %}" class="text-decoration-none dull-hover">
-      <p class="text-danger ms-3 mb-3 mt-4">My Address</p>
+      <p class="text-danger ms-3 mb-3 mt-4 fs-5">My Address</p>
   </a>
     <div>
       <h5 class="fw-semibold mb-2" data-bs-toggle="collapse" data-bs-target="#orderList" aria-expanded="false" aria-controls="orderList">
@@ -74,7 +74,9 @@
       
       </div>
 
-      <h5 class="fw-semibold">My Wallet</h5>
+      <h5 class="fw-semibold">
+        <a href="{% url 'wallet' %}" class="text-decoration-none text-light">My Wallet</a>
+      </h5>
       <button type="button" class="btn btn-danger w-100 mt-4">
         <i class="bi bi-box-arrow-right me-2"></i> Logout
       </button>

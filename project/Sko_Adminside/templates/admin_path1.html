@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SKO Admin{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Aclonica&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <script src="{% static 'movment.js' %}"></script>
+
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #ddd;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    nav {
+      font-family: 'Aclonica', sans-serif;
+    }
+    .sidebar {
+      background-color: #3a3a3a;
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: #ffffff;
+      border-radius: 5px;
+      transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+    .sidebar a i {
+      margin-right: 10px;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #495057;
+      color: #ffffff;
+    }
+    .btn-edit, .btn-remove {
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    .content-section {
+      padding: 20px;
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none; /* Hidden on smaller screens */
+      }
+      .offcanvas {
+        width: 250px;
+      }
+    }
+    .offcanvas {
+      background-color: #2a2a2a; /* Dark background for offcanvas */
+      color: #ffffff; /* White text */
+  }
+  
+  .offcanvas .offcanvas-header {
+      border-bottom: 1px solid #444; /* Subtle separator */
+  }
+  
+  .offcanvas .offcanvas-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+  }
+  
+  .offcanvas-body ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+  }
+  
+  .offcanvas-body ul li {
+      margin-bottom: 15px;
+  }
+  
+  .offcanvas-body ul li a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #ffffff; /* White text */
+      font-size: 1rem; /* Consistent font size */
+      padding: 10px 15px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .offcanvas-body ul li a i {
+      margin-right: 10px; /* Space between icon and text */
+      font-size: 1.2rem;
+  }
+  
+  .offcanvas-body ul li a:hover, .offcanvas-body ul li a.active {
+      background-color: #495057; /* Hover and active state background */
+      transform: translateX(5px); /* Subtle animation */
+      color: #ffffff; /* Keep text white */
+  }
+  
+  .btn-close-white {
+      filter: invert(1); /* Ensure close button is white */
+  }
+
+  .main-content {
+    flex: 1;
+    background-color: #444;
+    margin: 20px;
+    border-radius: 20px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .main-content {
+      margin: 10px; /* Reduce margin on smaller screens */
+      padding: 15px; /* Adjust padding for smaller devices */
+    }
+  }
+
+.cat-header {
+    width: auto;    /* Adjust width */
+    height: 40px;    /* Adjust height */
+    padding: 8px;    /* Modify padding */
+    text-align: center;  /* Align text horizontally */
+    vertical-align: middle; 
+
+}
+.editcat-header{
+    width: 400px;    /* Adjust width */
+    height: 40px;    /* Adjust height */
+    padding: 8px;    /* Modify padding */
+    text-align: center;  /* Align text horizontally */
+    vertical-align: middle; 
+
+}
+
+</style>
+
+</head>
+<body class="bg-black text-white d-flex flex-column min-vh-100">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top p-3 border-bottom border-secondary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">SKO.IN</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+
+        {% block content %}
+        <div class="content-section">
+          <!-- Placeholder for dynamic content -->
+        </div>
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center p-4 mt-auto small text-white">
+    &copy; 2024 SKO.IN VENTURES PVT LTD
+  </footer>
+
+</body>
+</html>

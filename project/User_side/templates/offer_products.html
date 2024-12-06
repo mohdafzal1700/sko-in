@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Product List Page{% endblock %}
+
+{% block content %}
+
+
+<form method="get" action="">
+    <select name="sort" onchange="this.form.submit()">
+        <option value="min_price" {% if sort_option == 'min_price' %}selected{% endif %}>Lowest Price</option>
+        <option value="max_price" {% if sort_option == 'max_price' %}selected{% endif %}>Highest Price</option>
+        <option value="featured" {% if sort_option == 'featured' %}selected{% endif %}>Featured</option>
+        <option value="new-arrivals" {% if sort_option == 'new-arrivals' %}selected{% endif %}>New Arrivals</option>
+        <option value="a-to-z" {% if sort_option == 'a-to-z' %}selected{% endif %}>A to Z</option>
+        <option value="z-to-a" {% if sort_option == 'z-to-a' %}selected{% endif %}>Z to A</option>
+    </select>
+</form>
+
+<div class="product-list">
+    {% for product in product_list %}
+        <div class="product-item">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <p>Price: {{ product.variants.first.price }}</p>
+            {% if product.has_active_offer %}
+                <p><strong>Offer:</strong> {{ product.get_active_offer.name }} - {{ product.get_active_offer.discount_values }}%</p>
+            {% endif %}
+            {% if product.product_in_wishlist %}
+                <p>In your wishlist</p>
+            {% else %}
+                <p><a href="{% url 'add_to_wishlist' product.id %}">Add to Wishlist</a></p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

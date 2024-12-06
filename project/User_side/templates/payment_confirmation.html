@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Black background */
+            color: #ecf0f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .confirmation-container {
+            background-color: #6C6B69; /* Gray box color */
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #f39c12;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .order-summary {
+            margin-bottom: 30px;
+        }
+
+        .order-summary p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .order-summary p strong {
+            font-weight: bold;
+        }
+
+        /* Address Section */
+        .address-summary {
+            background-color: #95a5a6; /* Light gray background for address section */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #2c3e50; /* Dark text for better contrast */
+        }
+
+        .address-summary h3 {
+            font-size: 18px;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        .address-summary p {
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 48%;
+            transition: background-color 0.3s ease;
+        }
+
+        #pay-now-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        #pay-now-btn:hover {
+            background-color: #2ecc71;
+        }
+
+        #cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        #cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .back-to-cart {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .back-to-cart a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-to-cart a:hover {
+            color: #f39c12;
+        }
+    </style>
+
+    
+</head>
+<body>
+
+<div class="confirmation-container">
+    <h2>Confirm Your Order</h2>
+
+    <!-- Display Order Summary -->
+    <div class="order-summary">
+        <p><strong>Original Price:</strong> ₹{{ request.session.order_summary.original_price }}</p>
+        <p><strong>Offer Price:</strong> ₹{{ request.session.order_summary.offer_price }}</p>
+        <p><strong>Coupon Discount:</strong> - ₹{{ request.session.order_summary.coupon_discount }}</p>
+        <p><strong>Grand Total:</strong> ₹{{ request.session.order_summary.grand_total_in_paise }}</p>
+    </div>
+
+    <div class="address-summary">
+        <h3>Shipping Address</h3>
+        {% if selected_address %}
+            <p><strong>Address Line 1:</strong> {{ selected_address.addressline1 }}</p>
+            <p><strong>Address Line 2:</strong> {{ selected_address.addressline2 }}</p>
+            <p><strong>City:</strong> {{ selected_address.city }}</p>
+            <p><strong>State:</strong> {{ selected_address.state }}</p>
+            <p><strong>Postal Code:</strong> {{ selected_address.zip_code }}</p>
+            <p><strong>Country:</strong> {{ selected_address.country }}</p>
+        {% else %}
+            <p>No address selected.</p>
+        {% endif %}
+    </div>
+        
+
+    <!-- Payment Confirmation -->
+    <p>Are you sure you want to proceed with the payment?</p>
+
+    <!-- Button Group for Pay Now and Cancel -->
+    <div class="button-group">
+        <button id="rzp-button1" class="button">Pay Now</button>
+        
+    </div>
+
+    <!-- Back to Cart Link -->
+    <div class="back-to-cart">
+        <p>Not ready to pay? <a href="{%url 'cart_view' %}">Back to Cart</a></p>
+    </div>
+</div>
+
+<form id="razorpay-form" style="display:none;">
+    <script 
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        data-key="{{ razorpay_key_id }}"
+        data-amount="{{ total_amount }}"
+        data-currency="INR"
+        data-order_id="{{ razorpay_order_id }}"
+        data-buttontext="Pay Now"
+        data-name="Your Store"
+        data-description="Order Payment"
+        data-prefill.name="{{ request.user.username }}"
+        data-prefill.email="{{ request.user.email }}"
+        data-theme.color="#F37254">
+    </script>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}", // Dynamic Key ID from Django context
+        "amount": "{{ order_summary.grand_total_in_paise }}", // Amount in paise, dynamically fetched from session
+        "currency": "INR",
+        "name": "Your Business Name", // Replace with your business name
+        "description": "Transaction for Order #{{ razorpay_order_id }}", // Dynamic order ID
+        "image": "https://example.com/your_logo", // Your logo URL
+        "order_id": "{{ razorpay_order_id }}", // Dynamic Razorpay order ID from the session
+        "callback_url": "{% url 'verify_payment' %}", // Dynamic callback URL for payment verification
+        "prefill": {
+            "name": "{{ user.username }}", // Prefill user's name
+            "email": "{{ user.email }}", // Prefill user's email
+            "contact": "{{ user.profile.phone_number }}" // Prefill user's phone number (if available)
+        },
+        "notes": {
+            "address": "Shipping address or notes for the transaction"
+        },
+        "theme": {
+            "color": "#3399cc" // Customize your theme color
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+
+
+
+
