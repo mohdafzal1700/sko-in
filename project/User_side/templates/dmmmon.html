@@ -1,0 +1,45 @@
+<script>
+    function toggleSearchField() {
+      const searchInput = document.getElementById('searchInput');
+      const submitSearch = document.getElementById('submitSearch');
+      
+      // Toggle visibility
+      if (searchInput.classList.contains('d-none')) {
+        searchInput.classList.remove('d-none');
+        submitSearch.classList.remove('d-none');
+        searchInput.focus();
+      } else {
+        searchInput.classList.add('d-none');
+        submitSearch.classList.add('d-none');
+      }
+    }
+  </script>
+
+
+  <div class="d-flex align-items-center gap-3">
+    <form action="{% url 'product_search' %}" method="get" class="d-flex align-items-center">
+      <input
+        type="text"
+        id="searchInput"
+        name="q"
+        placeholder="Search Products..."
+        class="form-control search-input bg-black text-white d-none"
+        style="width: 200px; border-radius: 30px; border: none; padding-left: 10px; transition: width 0.3s;">
+      
+      <button
+        type="button"
+        id="searchButton"
+        style="background-color: transparent; border: none; cursor: pointer;"
+        onclick="toggleSearchField()">
+        <i class="fa-solid fa-search" style="color: white; font-size: 1.6em;"></i>
+      </button>
+      
+      <button
+        type="submit"
+        id="submitSearch"
+        class="d-none"
+        style="background-color: transparent; border: none; cursor: pointer;">
+        <i class="fa-solid fa-paper-plane" style="color: white; font-size: 1.6em;"></i>
+      </button>
+    </form>
+    

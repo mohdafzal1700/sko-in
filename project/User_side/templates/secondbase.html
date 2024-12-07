@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,171 +14,179 @@
   <link rel="stylesheet" href="{% static 'style.css' %}">
   <script src="{% static 'movment.js' %}" defer></script>
 
-  
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  <style>
+    /* Offcanvas Styling */
+    .offcanvas-header {
+      background-color: #800020;
+      color: white;
+    }
 
-  .offcanvas-body {
-    background-color: #800020; /* Dark background for better contrast */
-    padding: 30px 20px;
-    font-family: 'Inter', sans-serif;
-  }
+    .offcanvas-body {
+      background-color: #800020; /* Dark background for better contrast */
+      color: white;
+      font-family: 'Inter', sans-serif;
+      padding: 30px 20px;
+    }
 
-  .offcanvas-body ul {
-    padding-left: 0; /* Remove default list padding */
-    list-style: none; /* Remove bullet points */
-  }
+    .offcanvas-body ul {
+      padding-left: 0;
+      list-style: none;
+    }
 
-  .offcanvas-body li {
-    margin-bottom: 15px; /* Spacing between items */
-  }
+    .offcanvas-body li {
+      margin-bottom: 15px;
+    }
 
-  .offcanvas-body a {
-    color: #ffffff; /* White text color */
-    text-decoration: none;
-    font-size: 1.25rem; /* Increase font size */
-    font-weight: 500; /* Make the font slightly bolder */
-    transition: color 0.3s ease; /* Smooth color change */
-  }
+    .offcanvas-body a {
+      color: #ffffff; /* White text color */
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
 
-  .offcanvas-body a:hover {
-    color: #d4af37; /* Gold color on hover for contrast */
-    text-decoration: underline;
-  }
-</style>
+    .offcanvas-body a:hover {
+      color: #d4af37; /* Gold on hover */
+      text-decoration: underline;
+    }
 
+    /* Bottom-left Profile and Wishlist */
+    .offcanvas-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+    }
 
+    .offcanvas-bottom a {
+      display: block;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .offcanvas-bottom a:hover {
+      color: #d4af37;
+    }
+
+    /* Search Input Placeholder Styling */
+    .search-input::placeholder {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+    }
+
+    .offcanvas-body {
+      text-align: left;
+    }
+
+    .offcanvas-bottom a {
+      display: block;
+      margin-bottom: 10px; /* Adds spacing between each link */
+    }
+
+  </style>
 </head>
 <body class="bg-black text-white d-flex flex-column min-vh-100">
+
+  <!-- Navbar -->
   <nav class="d-flex justify-content-between align-items-center p-3 sticky-top bg-black" 
-         style="font-family: 'Aclonica', sans-serif; border-bottom: 1px solid grey; z-index: 1030;">
-        <!-- Hamburger icon to open offcanvas -->
-        <div>
-            <i class="fa-solid fa-bars" style="color: white; font-size: 1.6em; cursor: pointer;" 
-               data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"></i>
-        </div>
-
-        <!-- Centered Heading -->
-        <h1 class="fs-2 fw ms-5" style="letter-spacing: .6em; color: white;">SKO.IN</h1>
-
-        <!-- Placeholder for right alignment, if needed -->
-        <div>
-          <a href="{% url 'Userprofile' %}" style="text-decoration: none;">
-            <i class="fa-solid fa-user me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-          <a href="{% url 'cart_view' %}" style="text-decoration: none;">
-            <i class="fa-solid fa-cart-shopping me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-          
-          <a href="{% url 'wishlist' %}" style="text-decoration: none;">
-            <i class="fa-regular fa-heart me-3" style="font-size: 1.4em; color: white;"></i>
-          </a>
-        </div>
-    </nav>
-
-    
-
-    <!-- Offcanvas Sidebar -->
-    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <ul class="list-unstyled">
-                <li><a href="{%url 'home'%}" class="text-white text-decoration-none">Home</a></li>
-                <li><a href="{%url 'product_list'%}" class="text-white text-decoration-none">Shop ALL</a></li>
-                <li><a href="#" class="text-white text-decoration-none">Services</a></li>
-                <li><a href="#" class="text-white text-decoration-none">Contact</a></li>
-                <li><a href="{%url 'user_logout' %}" class="text-white text-decoration-none">Logout </a></li>
-            </ul>
-        </div>
+       style="font-family: 'Aclonica', sans-serif; border-bottom: 1px solid grey; z-index: 1030;">
+    <!-- Hamburger Icon -->
+    <div>
+      <i class="fa-solid fa-bars" style="color: white; font-size: 1.6em; cursor: pointer;" 
+         data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"></i>
     </div>
 
+    <!-- Centered Logo -->
+    <h1 id="logoText" class="fs-2 fw-bold ms-5 text-white d-md-block" 
+    style="letter-spacing: .6em;">SKO.IN</h1>
 
-  <!-- Messages Section -->
+    <!-- Right Section -->
+    <div class="d-flex align-items-center gap-3">
+      <form action="{% url 'product_search' %}" method="get" class="d-flex align-items-center">
+        <input
+          type="text"
+          id="searchInput"
+          name="q"
+          placeholder="Search Products..."
+          class="form-control search-input bg-black text-white d-none"
+          style="width: 200px; border-radius: 30px; border: none; padding-left: 10px; transition: width 0.3s;">
+        
+        <button
+          type="button"
+          id="searchButton"
+          style="background-color: transparent; border: none; cursor: pointer;"
+          onclick="toggleSearchField()">
+          <i class="fa-solid fa-search" style="color: white; font-size: 1.6em;"></i>
+        </button>
+        
+        <button
+          type="submit"
+          id="submitSearch"
+          class="d-none"
+          style="background-color: transparent; border: none; cursor: pointer;">
+          <i class="fa-solid fa-paper-plane" style="color: white; font-size: 1.6em;"></i>
+        </button>
+      </form>
 
-  <!-- Messages Section -->
-  {% for message in messages %}
-  {% if message.tags == "error" %}
-    <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <!-- Icons -->
+      <a href="{% url 'cart_view' %}" class="text-white d-none d-md-block">
+        <i class="fa-solid fa-cart-shopping" style="font-size: 1.4em;"></i>
+      </a>
+      <a href="{% url 'wishlist' %}" class="text-white d-none d-md-block">
+        <i class="fa-regular fa-heart" style="font-size: 1.4em;"></i>
+      </a>
+      <a href="{% url 'Userprofile' %}" class="text-white d-none d-md-block">
+        <i class="fa-solid fa-user" style="font-size: 1.4em;"></i>
+      </a>
     </div>
-  {% elif message.tags == "success" %}
-    <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
-      <i class="bi bi-check-circle-fill"></i>
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% else %}
-    <div class="alert alert-info alert-dismissible fade show custom-alert" role="alert">
-      <i class="bi bi-info-circle-fill"></i>
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  {% endif %}
-{% endfor %}
+  </nav>
 
-
+  <!-- Offcanvas Sidebar -->
+  <div class="offcanvas offcanvas-start bg-white text-dark" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="list-unstyled">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'product_list' %}">Shop ALL</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="{% url 'user_logout' %}">Logout</a></li>
+      </ul>
+      
+      <!-- Profile and Wishlist at Bottom -->
+      <div class="offcanvas-bottom d-md-none">
+        <a href="{% url 'cart_view' %}" style="font-size: 0.8rem;">
+          <i class="fa-solid fa-cart-shopping fa-sm"></i> Cart
+        </a>
+        <a href="{% url 'Userprofile' %}"  style="font-size: 0.8rem;"><i class="fa-solid fa-user fa-sm"></i> Profile</a>
+        <a href="{% url 'wishlist' %}"  style="font-size: 0.8rem;"><i class="fa-regular fa-heart fa-sm"></i> Wishlist</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Content -->
-  
-      {% block content %}
-     
-      {% endblock %}
-    
-<!-- Footer -->
+  {% block content %}
+  {% endblock %}
 
-       
-  
-  
-  <!-- Add this CSS inside a <style> block, or in your external stylesheet -->
-  <style>
-    /* CSS to change placeholder color only for inputs with the class "footer-input" */
-    .footer-input::placeholder {
-      color: white; /* Change placeholder text color to white */
-      opacity: 1; /* Ensure full opacity of the placeholder */
-    }
-    <style>
-      .custom-alert {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1.25rem;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: opacity 1s ease; 
-      }
-      .custom-alert.fade-out {
-        opacity: 0; /* Fade out to transparent */
-      }
-      .custom-alert i {
-        margin-right: 8px;
-        font-size: 1.25rem;
-      }
-      .alert-danger {
-        background-color: #f8d7da;
-        color: #842029;
-        border-color: #f5c2c7;
-      }
-      .alert-success {
-        background-color: #d1e7dd;
-        color: #0f5132;
-        border-color: #badbcc;
-      }
-      .alert-info {
-        background-color: #cff4fc;
-        color: #055160;
-        border-color: #b6effb;
-      }
-    </style>
-    
+  <!-- Footer -->
+ 
 
-  
-      
-     
-  
+  <!-- Scripts -->
+
+
+  <script>
+    AOS.init({
+        duration: 1000, // Controls animation duration
+        once: true // Animation occurs only once
+    });
+</script>
+
 <script>
   // Automatically close the alert with a fade-out effect after 4 seconds
   document.addEventListener("DOMContentLoaded", function () {
@@ -193,16 +201,24 @@
     });
   });
 </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleSearchField() {
+      const logoText = document.getElementById('logoText');
+      const searchInput = document.getElementById('searchInput');
+      const submitSearch = document.getElementById('submitSearch');
+      
+      // Toggle visibility
+      if (searchInput.classList.contains('d-none')) {
+        searchInput.classList.remove('d-none');
+        submitSearch.classList.remove('d-none');
+        logoText.classList.add('d-none'); // Hide logo when searching
+      } else {
+        searchInput.classList.add('d-none');
+        submitSearch.classList.add('d-none');
+        logoText.classList.remove('d-none');
+      }
+    }
+  </script>
 
-<script>
-    AOS.init({
-        duration: 1000, // Controls animation duration
-        once: true // Animation occurs only once
-    });
-</script>
 </body>
 </html>

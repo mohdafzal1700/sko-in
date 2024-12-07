@@ -1,72 +1,75 @@
 {% extends 'base.html' %}
 
-
 {% block title %}Login Page{% endblock %}
 
 {% block content %}
   <!-- Main Content -->
-  <main class="flex-grow-1 d-flex align-items-center justify-content-center px-4" style="font-family: 'Inclusive Sans', sans-serif;">
-    <div class="bg-white text-dark rounded mt-5 p-1 p-md-4 w-50" style="max-width: 450px;">
-      <div class="d-flex justify-content-center">
-        <h2 class="fs-1 mt-0 fw-medium  mb-0">Log In</h2>
-      </div>
-      <div class="d-flex justify-content-center">
-        <p class="text-muted mt-0 mb-5" style="font-size: 0.8em; letter-spacing: 0.3em;">Welcome Back!!!</p>
-    </div>
-    
+  <main class="flex-grow-1 d-flex align-items-center justify-content-center pt-5 px-3 px-md-4" style="font-family: 'Inclusive Sans', sans-serif;">
+    <div class="container">
+      <div class="bg-white text-dark rounded p-3 p-md-4 mx-auto" style="max-width: 450px;">
+        <!-- Title Section -->
+        <div class="text-center">
+          <h2 class="fs-2 mt-0 fw-medium">Log In</h2>
+          <p class="text-muted fs-6 mt-1" style="letter-spacing: 0.2em;">Welcome Back!!!</p>
+        </div>
 
-      <form method="POST" enctype="multipart/form-data" class="mb-3">
-        {% csrf_token %}
-        <div class="mb-3">
+        <!-- Login Form -->
+        <form method="POST" enctype="multipart/form-data" class="mb-3">
+          {% csrf_token %}
+          <div class="mb-3">
             <input 
-                type="text" 
-                style="border-radius: 50px;  background-color: #DCDCDC; color: black;" 
-                name="email" 
-                class="form-control bg-light" 
-                placeholder="Email or Username" 
-                value="{{ login_input }}"
-                required>
-        </div> <!-- Added the missing > -->
-        <div class="mb-3">
+              type="text" 
+              style="border-radius: 50px; background-color: #DCDCDC; color: black;" 
+              name="email" 
+              class="form-control bg-light" 
+              placeholder="Email or Username" 
+              value="{{ login_input }}" 
+              required>
+          </div>
+          <div class="mb-3">
             <input 
-                type="password" 
-                style="border-radius: 50px;  background-color: #DCDCDC; color: black;" 
-                name="password" 
-                class="form-control bg-light" 
-                placeholder="Password" 
-                required>
-        </div>
-       
-        <p class="text-center small mt-3">
-            <a href="{% url 'forget_pass_send_otp' %}" class="text-dark mt-4"  style="transition: color 0.1s;" onmouseover="this.style.color='#ff0000';" onmouseout="this.style.color='';">Forgot password?</a>
-        </p>
-        
-        
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn mt-1"  style="background-color: grey; color: white; width: 30%; font-size: 1.2rem; padding: 5px; border-radius:20px;">Login</button>
-        </div>
-        <div>
-        <p style="font-size: 1em;  text-align: center;">New Customer? <a href="{% url 'user_sign' %}">start here</a> </p>
-        <div>
-          <hr>
-          <p style="font-size: 1em; line-height: 1.5;  text-align: center;">or continue with</p>
-      </div>
-      
-        
-        <form>
-            <div class="text-center">
-                {% load socialaccount %}
-                <a href="{% provider_login_url 'google' %}" class="btn btn-dark mt-1 rounded-button"> 
-                    <i class="fa-brands fa-google"></i> Google Login
-                </a>
-            </div>
-        
-            <div class="terms-text" style="font-size: 0.8em; margin-top: 10px; font-weight: 400;">
-                By clicking continue, you agree to our Terms of Service and Privacy Policy
-            </div>
+              type="password" 
+              style="border-radius: 50px; background-color: #DCDCDC; color: black;" 
+              name="password" 
+              class="form-control bg-light" 
+              placeholder="Password" 
+              required>
+          </div>
+
+          <!-- Forgot Password Link -->
+          <p class="text-center small mt-3">
+            <a href="{% url 'forget_pass_send_otp' %}" class="text-dark" style="transition: color 0.1s;" onmouseover="this.style.color='#ff0000';" onmouseout="this.style.color='';">Forgot password?</a>
+          </p>
+
+          <!-- Submit Button -->
+          <div class="d-flex justify-content-center">
+            <button type="submit" class="btn mt-1" style="background-color: grey; color: white; width: 100%; max-width: 150px; font-size: 1.2rem; padding: 5px; border-radius: 20px;">Login</button>
+          </div>
+          
+          <!-- New Customer Link -->
+          <p class="text-center mt-3">
+            New Customer? <a href="{% url 'user_sign' %}" class="text-decoration-underline">Start here</a>
+          </p>
+
+          <!-- Social Login -->
+          <div>
+            <hr>
+            <p class="text-center">or continue with</p>
+          </div>
+          
+          <div class="text-center">
+            {% load socialaccount %}
+            <a href="{% provider_login_url 'google' %}" class="btn btn-dark mt-1 rounded-button"> 
+              <i class="fa-brands fa-google"></i> Google Login
+            </a>
+          </div>
         </form>
-        
-    
+
+        <!-- Terms and Policy -->
+        <div class="text-center terms-text fs-6 mt-2">
+          By clicking continue, you agree to our <a href="#" class="text-decoration-underline">Terms of Service</a> and <a href="#" class="text-decoration-underline">Privacy Policy</a>.
+        </div>
+      </div>
     </div>
   </main>
 {% endblock %}

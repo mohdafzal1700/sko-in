@@ -7,16 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
 <style>
-    /* Fade In and Shake Animations */
-    .fade-in {
-        opacity: 0;
-        transition: opacity 0.5s ease-in;
-    }
-    .fade-in.show {
-        opacity: 1;
-    }
-
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
     body {
         font-family: 'Inter', sans-serif;
     }
@@ -29,12 +21,13 @@
         appearance: none;
         cursor: pointer;
     }
+
     .custom-select:focus {
         outline: none;
     }
 
     .select-container::after {
-        content: "▼";
+       
         position: absolute;
         top: 50%;
         right: 10px;
@@ -43,18 +36,17 @@
         pointer-events: none;
     }
 
-    /* Card Animation */
     .card {
         position: relative;
         overflow: hidden;
         transition: transform 0.3s ease;
         border-radius: 15px;
     }
+
     .card:hover {
         transform: translateY(-5px) rotate(-1deg);
     }
 
-    /* Diagonal Reflection Overlay */
     .card::before {
         content: '';
         position: absolute;
@@ -67,44 +59,67 @@
         pointer-events: none;
     }
 
-    /* AOS Animation */
-    [data-aos="fade-down"] {
-        opacity: 0;
-        transform: translateY(-20px);
-        transition: all 0.8s ease;
+    /* Make breadcrumbs text fit small screens */
+    .breadcrumb a, .breadcrumb-item.active {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    [data-aos="fade-down"].aos-animate {
-        opacity: 1;
-        transform: translateY(0);
+
+    @media (max-width: 576px) {
+        .breadcrumb {
+            font-size: 0.875rem;
+        }
+    }
+
+    .pagination .page-link {
+        background-color: transparent;
+        border: none;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    /* Adjust filters on smaller devices */
+    .filter-row {
+        row-gap: 1rem;
+    }
+
+    @media (max-width: 576px) {
+        .filter-label {
+            font-size: 0.875rem;
+        }
     }
 </style>
 
 <body class="bg-dark text-white py-4">
     <nav aria-label="breadcrumb" class="bg-dark p-3 rounded shadow-sm">
         <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item">
-            <a href="{% url 'home' %}" class="text-decoration-none text-white fw-semibold" style="opacity: 0.8;">Home</a>
-          </li>
-          <li class="breadcrumb-item active text-light fw-bold" aria-current="page">{{ category_name }}</li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}" class="text-decoration-none text-white fw-semibold" style="opacity: 0.8;">Home</a>
+            </li>
+            <li class="breadcrumb-item active text-light fw-bold" aria-current="page">{{ category_name }}</li>
         </ol>
-      </nav>
-      
+    </nav>
+
     <div class="container">
         <h2 class="text-start mb-4">{{ category_name }} Products</h2>
 
-
-        <div class="row mb-4">
-            <div class="col-12 col-sm-6 d-flex align-items-center mb-3 mb-sm-0">
-              <span class="me-2" style="color: #D9D9D9;">Filter:</span>
-              <div class="me-4 select-container">
-                <select class="custom-select" aria-label="Availability filter">
-                  <option selected>Availability</option>
-                  <option value="in-stock">In Stock</option>
-                  <option value="out-of-stock">Out of Stock</option>
-                </select>
-              </div>
-                <div class="me-4 select-container">
-                    <select  class="custom-select"   id="sortFilter" onchange="applySort()">
+        <!-- Filters -->
+        <div class="row mb-4 filter-row">
+            <div class="col-12 col-md-6 d-flex align-items-center">
+                <label for="sortFilter" class="me-2" style="color: #D9D9D9;">Filter:</label>
+                <div class="select-container me-3">
+                    <select class="custom-select" aria-label="Availability filter">
+                        <option selected>Availability</option>
+                        <option value="in-stock">In Stock</option>
+                        <option value="out-of-stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="select-container">
+                    <select id="sortFilter" class="custom-select" aria-label="Sort filter" onchange="applySort()">
                         <option value="price-low-to-high" {% if sort_option == 'price-low-to-high' %}selected{% endif %}>Price: Low to High</option>
                         <option value="price-high-to-low" {% if sort_option == 'price-high-to-low' %}selected{% endif %}>Price: High to Low</option>
                         <option value="average-ratings" {% if sort_option == 'average-ratings' %}selected{% endif %}>Sort by: Average Ratings</option>
@@ -113,14 +128,14 @@
                         <option value="a-to-z" {% if sort_option == 'a-to-z' %}selected{% endif %}>Sort by: A - Z</option>
                         <option value="z-to-a" {% if sort_option == 'z-to-a' %}selected{% endif %}>Sort by: Z - A</option>
                     </select>
-                    
                 </div>
-          </div>
+            </div>
+        </div>
 
         <!-- Product Cards -->
         <div class="row g-3">
             {% for product in page_obj %}
-            <div class="col-12 col-sm-6 col-lg-3" data-aos="fade-down">
+            <div class="col-6 col-md-4 col-lg-3" data-aos="fade-down">
                 <a href="{% url 'product_view' product.id %}" class="text-decoration-none text-dark">
                     <div class="card border-0 rounded shadow" style="background-color: #ffffff;">
                         <div class="position-relative">
@@ -156,45 +171,46 @@
             </div>
             {% endfor %}
         </div>
-        
+
+        <!-- Pagination -->
         <div class="d-flex justify-content-center mt-4">
             <nav aria-label="Page navigation">
                 <ul class="pagination pagination-sm">
                     {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link text-dark" href="?page={{ page_obj.previous_page_number }}&sort={{ sort_option }}" style="background-color: transparent; border: none;">Previous</a>
+                        <a class="page-link text-dark" href="?page={{ page_obj.previous_page_number }}&sort={{ sort_option }}">Previous</a>
                     </li>
                     {% endif %}
                     {% for num in page_obj.paginator.page_range %}
                     <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link text-dark {% if page_obj.number == num %}bg-secondary{% endif %}" href="?page={{ num }}&sort={{ sort_option }}" style="background-color: transparent; border: none;">{{ num }}</a>
+                        <a class="page-link text-dark {% if page_obj.number == num %}bg-secondary{% endif %}" href="?page={{ num }}&sort={{ sort_option }}">{{ num }}</a>
                     </li>
                     {% endfor %}
                     {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link text-dark" href="?page={{ page_obj.next_page_number }}&sort={{ sort_option }}" style="background-color: transparent; border: none;">Next</a>
+                        <a class="page-link text-dark" href="?page={{ page_obj.next_page_number }}&sort={{ sort_option }}">Next</a>
                     </li>
                     {% endif %}
                 </ul>
             </nav>
         </div>
-        
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: true,
-            });
-        });
-    </script>
 
-    <script>
-        function applySort() {
-            const sortOption = document.getElementById('sortFilter').value;
-            window.location.href = `?sort=${sortOption}`;
-        }
-    </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true,
+                });
+            });
+
+            function applySort() {
+                const sortOption = document.getElementById('sortFilter').value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('sort', sortOption);
+                window.location.href = currentUrl.href;
+            }
+        </script>
 </body>
 {% endblock %}

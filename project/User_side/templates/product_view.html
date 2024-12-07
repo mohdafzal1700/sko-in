@@ -114,125 +114,184 @@
     .whatsapp-button:hover {
         background-color: #1DAF5E; /* Darker green on hover */
     }
-    
+    .quantity-input {
+        width: 50px;
+        text-align: center;
+    }
+    .input-group .btn {
+        min-width: 35px;
+    }
+
+    /* Custom button styling */
+    .custom-cart-button {
+        background-color: rgba(255, 255, 255, 0.8);
+        color: black;
+        border-radius: 25px;
+        border: none;
+        transition: background-color 0.3s;
+    }
+    .custom-cart-button:hover {
+        background-color: rgba(255, 255, 255, 1);
+        color: black;
+    }
+    .whatsapp-button {
+        background-color: #25D366;
+        color: white;
+        border-radius: 25px;
+        transition: background-color 0.3s;
+    }
+    .whatsapp-button:hover {
+        background-color: #1DAF5E;
+    }
+
+    /* Heart icon styles */
+    .heart-icon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        color: white;
+        z-index: 10;
+        transition: color 0.3s ease;
+    }
+    .heart-icon:hover {
+        color: red;
+    }
 </style>
 
 <body>
-    <div class="container py-5 fade-in" id="productList">  <!-- Add fade-in class here -->
-        <div class="row g-4">    
-            <!-- Main Product Details -->
-            <div class="col-lg-6 d-flex gap-4">
-                <div class="d-flex flex-column gap-3" style="position: sticky; top: 20px;">
-                    {% for image in product.variants.first.images.all %}
-                    <div class="thumbnail-container border rounded p-1" style="width: 90px; height: 90px;">
-                        <button class="btn p-0 border-0" style="width: 100%; height: 100%;" 
-                                onclick="setImage('{{ image.image.url }}')">
-                            <img src="{{ image.image.url }}" alt="Product thumbnail" class="img-fluid rounded" 
-                                 style="object-fit: cover; width: 100%; height: 100%;">
-                        </button>
-                    </div>
-                    {% endfor %}
+  <div class="container py-5 fade-in" id="productList">
+    <div class="row g-4">
+        <!-- Main Product Details -->
+        <div class="col-lg-6 d-flex flex-column flex-lg-row gap-4">
+            <!-- Thumbnails -->
+            <div class="d-flex flex-lg-column flex-row gap-3 justify-content-center align-items-lg-start order-1 order-lg-0">
+                {% for image in product.variants.first.images.all %}
+                <div class="thumbnail-container border rounded p-1" style="width: 80px; height: 80px;">
+                    <button class="btn p-0 border-0" style="width: 100%; height: 100%;" onclick="setImage('{{ image.image.url }}')">
+                        <img src="{{ image.image.url }}" alt="Product thumbnail" class="img-fluid rounded" 
+                             style="object-fit: cover; width: 100%; height: 100%;">
+                    </button>
                 </div>
-                <div class="flex-grow-1 d-flex position-relative">
-                    <div class="position-relative w-100">  
-                        {% if product.variants.first.images.first %}
-                        <img id="mainImage" src="{{ product.variants.first.images.first.image.url }}" alt="Product image" class="img-fluid rounded" style="width: 100%; height: 600px; object-fit: cover;">
-                        {% else %}
-                        <img id="mainImage" src="/static/placeholder.svg?height=600&width=600" alt="Placeholder image" class="img-fluid rounded" style="width: 100%; height: 600px; object-fit: cover;">
-                        {% endif %}
-
-                        <form action="{% url 'add_to_wishlist' %}" method="post" class="add-to-wishlist-form" id="wishlistForm">
-                            {% csrf_token %}
-                            <input type="hidden" name="variant_id" value="{{ default_variant.id }}">
-                            
-                            {% if product_in_wishlist %}
-                                <!-- If product is in wishlist, display heart in red -->
-                                <button type="submit" class="btn btn-link heart-icon" style="color: red;">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            {% else %}
-                                <!-- If product is not in wishlist, display heart in white -->
-                                <button type="submit" class="btn btn-link heart-icon" style="color: white;">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            {% endif %}
-                        </form>
-                        
-                    </div>
-
-                    <div id="zoom" class="zoom-preview">
-                        <img id="zoomedImage" src="{{ product.variants.first.images.first.image.url }}" alt="Zoomed image">
-                    </div>
-                </div>
+                {% endfor %}
             </div>
 
-            <div class="col-lg-6">
-                <p class="text small text-start">SKO.IN</p>
-                <h1 class="display-5 fw-bold text-start">{{ product.name }}</h1>
-               
-                <div class="d-flex align-items-baseline gap-2 my-3 text-start">
-                    <!-- Check if a discount exists -->
-                    {% if product.variants.first.get_discounted_price != product.variants.first.price %}
-                    <!-- Discounted price -->
-                    <span class="fs-5 text" style="text-decoration: line-through;">
-                        Rs. <span id="strikethroughPrice">{{ product.variants.first.price|floatformat:2 }}</span>
-                    </span>
-                    <span class="fs-3 fw-bold text" id="variantPrice">
-                        Rs. <span id="discountedPriceValue">{{ product.variants.first.get_discounted_price|floatformat:2 }}</span>
-                    </span>
+            <!-- Main Image -->
+            <div class="flex-grow-1 position-relative order-0 order-lg-1">
+                <div class="position-relative w-100">
+                    {% if product.variants.first.images.first %}
+                    <img id="mainImage" src="{{ product.variants.first.images.first.image.url }}" alt="Product image" class="img-fluid rounded" 
+                         style="width: 100%; height: auto; object-fit: cover;">
                     {% else %}
-                    <!-- No discount -->
-                    <span class="fs-3 fw-bold text" id="variantPrice">
-                        Rs. <span id="discountedPriceValue">{{ product.variants.first.price|floatformat:2 }}</span>
-                    </span>
+                    <img id="mainImage" src="/static/placeholder.svg?height=600&width=600" alt="Placeholder image" class="img-fluid rounded" 
+                         style="width: 100%; height: auto; object-fit: cover;">
                     {% endif %}
-                    <span id="variantStock" class="fs-5">
-                        Stock: {{ product.variants.first.stock }}
-                    </span>
+
+                    <!-- Wishlist Button -->
+                    <form action="{% url 'add_to_wishlist' %}" method="post" class="add-to-wishlist-form" id="wishlistForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="variant_id" value="{{ default_variant.id }}">
+                        
+                        {% if product_in_wishlist %}
+                            <!-- If product is in wishlist, display heart in red -->
+                            <button type="submit" class="btn btn-link heart-icon" style="color: red;">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        {% else %}
+                            <!-- If product is not in wishlist, display heart in white -->
+                            <button type="submit" class="btn btn-link heart-icon" style="color: white;">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        {% endif %}
+                    </form>
                 </div>
-                <span id="variantPrice"></span>
-<span id="strikethroughPrice"></span>
-<span id="discountedPriceValue"></span>
-<span id="variantStock"></span>
 
-
-                <form action="{% url 'add_to_cart' %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="variant_id" id="hidden_variant_id" value="{{ product.variants.first.id }}">
-                    
-                    <!-- Your Select Element (without inline onchange) -->
-<div class="mb-2" style="width: 8em;">
-    <label class="form-label">Size & Color</label>
-    <select class="form-select" id="variantSelect">
-        {% for variant in product.variants.all %}
-            <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-discounted-price="{{ variant.get_discounted_price }}" data-stock="{{ variant.stock }}" 
-                {% if variant.id == product.variants.first.id %}selected{% endif %}>
-                {{ variant.size }} - {{ variant.color }}
-            </option>
-        {% endfor %}
-    </select>
-</div>
-
-               
-                            <div class="mb-3" style="width: 6em;">
-                        <label class="form-label">Quantity</label>
-                        <div class="input-group">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(-1)">-</button>
-                            <input type="text" id="quantity" class="form-control text-center quantity-input" value="1" name="quantity" readonly>
-                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(1)">+</button>
-                        </div>
-                    </div>
-                
-                    <div class="d-grid gap-2 my-3">
-                        <button type="submit" class="btn custom-cart-button btn-lg mb-5 mt-4">Add to cart</button>
-
-</form>
-
-<a href="https://wa.me/918891694003?text=Hello%2C%20I%27d%20like%20to%20place%20an%20order!" target="_blank" class="btn custom-cart-button btn-lg whatsapp-button mb-5 mt-4">ORDER ON WHATSAPP</a>
-
-                   
+                <!-- Zoom Preview -->
+                <div id="zoom" class="zoom-preview" style="display: none;">
+                    <img id="zoomedImage" src="{{ product.variants.first.images.first.image.url }}" alt="Zoomed image">
+                </div>
             </div>
         </div>
+    
+
+        <div class="col-lg-6 mx-auto">
+            <p class="textsmall text-start">SKO.IN</p>
+        
+            <h1 class="display-5 fw-bold text-start">{{ product.name }}</h1>
+        
+            <div class="d-flex align-items-baseline gap-2 my-3 text-start">
+                {% if product.variants.first.get_discounted_price != product.variants.first.price %}
+                <!-- Original Price (Strikethrough) -->
+                <span class="fs-5 text" style="text-decoration: line-through;">
+                    Rs. <span id="strikethroughPrice">{{ product.variants.first.price }}</span>
+                </span>
+                <!-- Discounted Price -->
+                <span class="fs-3 fw-bold text" id="variantPrice">
+                    Rs. <span id="discountedPriceValue">{{ product.variants.first.get_discounted_price }}</span>
+                </span>
+                <!-- Sale Tag -->
+                <span class="badge bg-dark text-light">Sale</span>
+                {% else %}
+                <!-- No discount -->
+                <span class="fs-3 fw-bold " id="variantPrice">
+                    Rs. <span id="discountedPriceValue">{{ product.variants.first.price }}</span>
+                </span>
+                {% endif %}
+                <span id="variantStock" class="fs-5 text">
+                    Stock: {{ product.variants.first.stock }}
+                </span>
+            </div>
+            <span id="variantPrice"></span>
+            <span id="strikethroughPrice"></span>
+            <span id="discountedPriceValue"></span>
+            <span id="variantStock"></span>
+        
+            <p class="text small text-start">Shipping calculated at checkout.</p>
+        
+            <form action="{% url 'add_to_cart' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="variant_id" id="hidden_variant_id" value="{{ product.variants.first.id }}">
+        
+                <div class="mb-3">
+                    <label for="variantSelect" class="form-label">Size</label>
+                    <select class="form-select" id="variantSelect">
+                        {% for variant in product.variants.all %}
+                        <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-discounted-price="{{ variant.get_discounted_price }}" data-stock="{{ variant.stock }}" 
+                            {% if variant.id == product.variants.first.id %}selected{% endif %}>
+                            {{ variant.size }} - {{ variant.color }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+        
+                <div class="mb-3" style="width: 8em;">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(-1)">-</button>
+                        <input type="text" id="quantity" class="form-control text-center quantity-input" value="1" name="quantity" readonly>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(1)">+</button>
+                    </div>
+                </div>
+        
+                <div class="d-grid gap-2 my-3">
+                    <!-- Add to Cart Button -->
+                    <button type="submit" class="btn btn-outline-dark btn-lg custom-cart-button">Add to cart</button>
+                </div>
+            </form>
+        
+            <div class="d-grid gap-2">
+                <!-- Order on WhatsApp Button -->
+                <a href="https://wa.me/918891694003?text=Hello%2C%20I%27d%20like%20to%20place%20an%20order!" 
+                   target="_blank" 
+                   class="btn btn-success btn-lg whatsapp-button">
+                    ORDER ON WHATSAPP
+                </a>
+            </div>
+        </div>
+        
         <h1 class="mt-5 text-light">Related Products</h1>
         <div class="row g-4">
           {% for product in related_product %}
@@ -351,12 +410,12 @@
                 // Update the price display based on whether a discount exists
                 if (discountedPrice !== price) {
                     // Show discounted price
-                    strikethroughPriceElement.textContent = ` ${price.toFixed(2)}`;
-                    discountedPriceValueElement.textContent = `  ${discountedPrice.toFixed(2)}`;
+                    strikethroughPriceElement.textContent = ` ${price}`;
+                    discountedPriceValueElement.textContent = `  ${discountedPrice}`;
                 } else {
                     // No discount
                     strikethroughPriceElement.textContent = '';  // Clear the strikethrough price
-                    discountedPriceValueElement.textContent = `  ${price.toFixed(2)}`;
+                    discountedPriceValueElement.textContent = `  ${price}`;
                 }
     
                 // Update stock display based on the stock value
