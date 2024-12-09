@@ -1605,6 +1605,10 @@ def cancelorder(request, id):
     
     order_item = get_object_or_404(OrderItem, id=id, order__user=request.user)
     
+    user = order_item.order.user
+    wallet, created = Wallet.objects.get_or_create(user=user)
+    
+    
     if order_item.status != "Pending":
         messages.error(request, "Order cannot be canceled as it is already processed or delivered.")
         return redirect("userorders")
@@ -1621,15 +1625,15 @@ def cancelorder(request, id):
             messages.error(request, "Cancel reason must start with an alphabet and contain at least 4 alphabetic characters.")
             return redirect("userorders")
         
-        discounted_price = order_item.variant.get_discounted_price()
-        refund_amount = discounted_price * order_item.quantity
+        discounted_price = Decimal( order_item.variant.get_discounted_price())
+        refund_amount = discounted_price *  Decimal(order_item.quantity)
         
         with transaction.atomic():
             order_item.status = "Cancelled"
             order_item.cancellation_reason = cancel_reason
             order_item.save(update_stock=False)
             
-            wallet = Wallet.objects.get(user=request.user)
+            wallet, _ = Wallet.objects.get_or_create(user=request.user)
             
             
             if order_item.order.is_paid  and order_item.order.paymentmethod != "Cash On Delivery":    

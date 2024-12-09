@@ -1166,6 +1166,11 @@ def process_return_request(request, id, action):
     if order_item.status != "Return Requested":
         messages.error(request, "The order item is not in a 'Return Requested' state.")
         return redirect("admin_order_management")  # Change to your admin view name
+    
+    user = order_item.order.user
+    wallet, created = Wallet.objects.get_or_create(user=user)
+    if created:
+        messages.info(request, f"A new wallet was created for the user: {user.username}")
 
     try:
         with transaction.atomic():

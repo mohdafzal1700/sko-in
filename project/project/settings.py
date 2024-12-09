@@ -119,13 +119,28 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB (You can adjust this value as ne
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'skodata',      # Database name
-        'USER': 'postgres',           # PostgreSQL username
-        'PASSWORD': 'afsal',   # PostgreSQL password
-        'HOST': 'localhost',        # Host address (default is localhost)
-        'PORT': '5432',             # Default PostgreSQL port
+        'NAME': 'backend',
+        'USER': 'mysuperuser',
+        'PASSWORD': 'mysuperuser',
+        'HOST': 'backend.czo628m24sbu.ap-southeast-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'skodata',      # Database name
+#         'USER': 'postgres',           # PostgreSQL username
+#         'PASSWORD': 'afsal',   # PostgreSQL password
+#         'HOST': 'localhost',        # Host address (default is localhost)
+#         'PORT': '5432',             # Default PostgreSQL port
+#     }
+# }
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

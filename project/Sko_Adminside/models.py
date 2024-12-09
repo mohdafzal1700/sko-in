@@ -550,11 +550,13 @@ class Wallet(models.Model):
 
     def credit(self, amount):
         """Add money to the wallet (credit)"""
+        amount = Decimal(amount)
         self.balance += amount
         self.save()
 
     def debit(self, amount):
         """Deduct money from the wallet (debit)"""
+        amount = Decimal(amount)
         if self.balance >= amount:
             self.balance -= amount
             self.save()
