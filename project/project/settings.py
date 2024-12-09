@@ -226,3 +226,15 @@ SESSION_COOKIE_NAME = 'Sko_Adminside_sessionid'
 
 # User side session configuration
 USER_SESSION_COOKIE_NAME = 'User_side_sessionid'
+
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = 'AKIAR3HUODVIUM3BQVHG'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'skodin'
+AWS_S3_SIGNATURE_NAME = 's3v4',
+AWS_S3_REGION_NAME = 'ap-southeast-2'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL =  None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'        
